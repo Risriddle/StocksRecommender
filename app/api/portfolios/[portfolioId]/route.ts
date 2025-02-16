@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import {Portfolio} from "@/lib/db/models/Portfolio";
 
-export async function GET(req: NextRequest,{ params }: { params: { portfolioId: string } }) {
+export async function GET(req: NextRequest,context: { params?: { portfolioId?: string }}) {
     try {
         await dbConnect();
-        const { portfolioId } = await Promise.resolve(params); 
+        const portfolioId  = context.params?.portfolioId;
 
         console.log(portfolioId, "portfolio ID received");
 
