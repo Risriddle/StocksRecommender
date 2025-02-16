@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import {Portfolio} from "@/lib/db/models/Portfolio";
 
-export async function GET(req: NextRequest,{ params }: { params: { userId: string } }) {
+export async function GET(req: NextRequest,context: { params?: { userId?: string } }) {
     try {
         await dbConnect();
-        const { userId } = await Promise.resolve(params); // ✅ Await params
+        const userId=context.params?.userId // ✅ Await params
 
         console.log(userId, "User ID received");
 
