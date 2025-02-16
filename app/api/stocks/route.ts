@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import  dbConnect  from '@/lib/db/connect';
 import { Stock } from '@/lib/db/models/Stock';
 import axios from "axios";
+import { updateStockData } from "@/lib/updateStockData"; 
+
+
 import { StockPriceHistory } from "@/lib/db/models/StockPriceHistory";
+import { get } from 'lodash';
 
 export async function GET(req: NextRequest) {
   await dbConnect();
@@ -120,10 +124,14 @@ const NewStock=await Stock.findOne({name:symbol})
       }));
 
 
+
     
     // Save the last 5 days' prices in StockPriceHistory
     await StockPriceHistory.deleteMany({ stock_id: NewStock._id }); // Remove previous history
     await StockPriceHistory.insertMany(priceHistory);
+
+     const getParams=await updateStockData();
+     console.log(getParams,"weekly api called============================================== ")
 
     return NextResponse.json({ success: true, stock: NewStock });
   }
