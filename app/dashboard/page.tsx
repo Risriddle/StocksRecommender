@@ -55,6 +55,7 @@ export default function StocksDashboard() {
   const router = useRouter();
   const userRole = session?.user?.role;
   const userId = session?.user?.id;
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchStockIndicators();
@@ -71,6 +72,7 @@ export default function StocksDashboard() {
 
   const fetchStockIndicators = async () => {
     try {
+      setLoading(true)
       const response = await fetch('/api/stocks/indicators');
       const data = await response.json();
       
@@ -92,16 +94,23 @@ export default function StocksDashboard() {
     } catch (error) {
       console.error('Error fetching stock indicators:', error);
     }
+    finally{
+      setLoading(false)
+    }
   };
   
 
   const fetchPortfolios = async () => {
     try {
+      setLoading(true)
       const response = await fetch(`/api/portfolios/users/${userId}`);
       const data = await response.json();
       setPortfolios(data || []);
     } catch (error) {
       console.error('Error loading portfolios:', error);
+    }
+    finally{
+      setLoading(false)
     }
   };
 
@@ -118,6 +127,11 @@ export default function StocksDashboard() {
 
   return (
     <div className="space-y-6 p-6 bg-black min-h-screen">
+       {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+        </div>
+      )}
       <PaymentModal isOpen={isPaymentOpen} onClose={() => setIsPaymentOpen(false)} />
 
       <div className="flex justify-between items-center">

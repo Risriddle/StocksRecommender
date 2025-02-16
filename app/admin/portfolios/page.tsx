@@ -40,9 +40,12 @@ export default function PortfolioManagement() {
   const [updatedName, setUpdatedName] = useState<string>("");
   const [editId, setEditId] = useState<string | null>(null);
   const { data: session } = useSession(); 
-  
+  const [loading, setLoading] = useState(false);
+
+
   useEffect(() => {
     loadPortfolios();
+
   }, []);
 
   useEffect(() => {
@@ -52,11 +55,15 @@ export default function PortfolioManagement() {
 
   const loadPortfolios = async () => {
     try {
+      setLoading(true);
       const response = await fetch('/api/admin/portfolios');
       const data = await response.json();
       setPortfolios(data || []);
     } catch (error) {
       console.error('Error loading portfolios:', error);
+    }
+    finally{
+      setLoading(false);
     }
   };
 
@@ -273,6 +280,11 @@ const handleUpdatePortfolio = async (portfolioId:string) => {
     <div className="space-y-6">
       <Button onClick={() => router.push('/admin')}>Back to Admin Panel</Button>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+        </div>
+      )}
         <Card>
           <CardHeader>
             <CardTitle>Create New Portfolio</CardTitle>

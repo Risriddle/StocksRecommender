@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import  dbConnect  from '@/lib/db/connect';
 import { Stock } from '@/lib/db/models/Stock';
 import axios from "axios";
-import { updateStockData } from "@/lib/updateStockData"; 
-
-
+import  {updateNewStock}  from "@/lib/updateNewStock"; 
 import { StockPriceHistory } from "@/lib/db/models/StockPriceHistory";
-import { get } from 'lodash';
+import { StockIndicator } from '@/lib/db/models/StockIndicator';
+import { Recommendation } from '@/lib/db/models/Recommendation';
+
+
 
 export async function GET(req: NextRequest) {
   await dbConnect();
@@ -16,9 +17,11 @@ export async function GET(req: NextRequest) {
     const stocks = await Stock.find({}); // Fetch all stocks
 
     for (const stock of stocks) {
-        console.log(stock.added_date,today,"datessssssssssssssssss")
+       
+        const stockDate = new Date(stock.added_date).toISOString().split("T")[0]; // Extract only the date
+        console.log(stockDate,today,"datessssssssssssssssss")
     //   const existingEntry = await StockPriceHistory.findOne({ stock_id: stock._id, date: today });
-      if(stock.added_date===today)
+      if(stockDate===today)
       {
         continue;
       }
@@ -130,10 +133,11 @@ const NewStock=await Stock.findOne({name:symbol})
     await StockPriceHistory.deleteMany({ stock_id: NewStock._id }); // Remove previous history
     await StockPriceHistory.insertMany(priceHistory);
 
-     const getParams=await updateStockData();
-     console.log(getParams,"weekly api called============================================== ")
-
-    return NextResponse.json({ success: true, stock: NewStock });
+    const update=await updateNewStock(NewStock._id)
+     if(update){
+      return NextResponse.json({ success: true, stock: NewStock });
+     }
+    return NextResponse.json({ success: false},{status:500});
   }
    catch (error) {
     console.error("Error fetching stock data:", error);
@@ -157,6 +161,9 @@ export async function DELETE(req: NextRequest) {
         }
 
         await Stock.findByIdAndDelete(id);
+        await StockIndicator.findOneAndDelete({stock_id:id});
+        await Recommendation.findOneAndDelete({stock_id:id});
+       
 
         return NextResponse.json({ success: true, message: 'Stock deleted successfully' }, { status: 200 });
     } catch (error: any) {

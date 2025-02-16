@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextResponse ,NextRequest} from "next/server";
 import { updateStockData } from "@/lib/updateStockData"; 
+
 
 export async function GET() {
   try {
@@ -10,3 +11,7 @@ export async function GET() {
     return NextResponse.json({ message: "Failed to update stock data" }, { status: 500 });
   }
 }
+
+
+
+

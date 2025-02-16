@@ -38,11 +38,8 @@ export default function AdminDashboard() {
       const result = await response.json();
 console.log(result,"---------------------------")
       if (response.ok) {
-        // setMessage("Stock recommendations updated successfully ✅");
         setMessage("Stock recommendations updated successfully ✅");
-  setTimeout(() => {
-    window.location.reload();
-  }, 1000); 
+       
       } else {
         setMessage("Failed to update recommendations ❌");
       }
