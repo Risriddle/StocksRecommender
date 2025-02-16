@@ -6,11 +6,11 @@ import {Stock} from "@/lib/db/models/Stock";
 
 
 
-export async function GET(req: NextRequest,context: { params: { portfolioId: string }}) {
+export async function GET(req: NextRequest,context: { params?: { portfolioId?: string } }) {
     try {
         await dbConnect();
         // const { portfolioId } = await Promise.resolve(params);
-        const { portfolioId } = context.params;
+        const portfolioId  = context.params?.portfolioId;
     console.log("Portfolio ID:", portfolioId);
 
         console.log(portfolioId, "portfolio id in get stocks in a portfolio");
@@ -38,11 +38,11 @@ export async function GET(req: NextRequest,context: { params: { portfolioId: str
 }
 
 // Adding stocks to portfolio
-export async function POST(req: NextRequest ,context: { params: { portfolioId: string } } ) {
+export async function POST(req: NextRequest ,context: { params?: { portfolioId?: string } } ) {
     try {
         await dbConnect();
-        const { portfolioId } = context.params;
-    console.log("Portfolio ID:", portfolioId);
+        const portfolioId  = context.params?.portfolioId;
+  console.log("Portfolio ID:", portfolioId);
 
         const { name, price ,stockId} = await req.json();
         console.log(stockId,"stock id in add stockkkkkkkkkkkkkkkkkkk")
@@ -66,11 +66,12 @@ export async function POST(req: NextRequest ,context: { params: { portfolioId: s
 
 
 import mongoose from "mongoose";
-export async function DELETE(req: NextRequest,context: { params: { portfolioId: string } }) {
+export async function DELETE(req: NextRequest,context: { params?: { portfolioId?: string } }) {
     try {
         await dbConnect();
            const { stockId } = await req.json();
-           const { portfolioId } = context.params;
+           const portfolioId  = context.params?.portfolioId;
+
            console.log("Portfolio ID:", portfolioId);
        
         console.log("Received Portfolio ID:", portfolioId, "Stock ID:", stockId, "in delete stockkkkkkkkkkkkkkk");
