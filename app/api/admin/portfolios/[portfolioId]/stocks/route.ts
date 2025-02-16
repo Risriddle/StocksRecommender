@@ -6,10 +6,12 @@ import {Stock} from "@/lib/db/models/Stock";
 
 
 
-export async function GET(req: NextRequest, { params }: { params: { portfolioId: string } }) {
+export async function GET(req: NextRequest,context: { params: { portfolioId: string }}) {
     try {
         await dbConnect();
-        const { portfolioId } = await Promise.resolve(params);
+        // const { portfolioId } = await Promise.resolve(params);
+        const { portfolioId } = context.params;
+    console.log("Portfolio ID:", portfolioId);
 
         console.log(portfolioId, "portfolio id in get stocks in a portfolio");
 
@@ -36,16 +38,19 @@ export async function GET(req: NextRequest, { params }: { params: { portfolioId:
 }
 
 // Adding stocks to portfolio
-export async function POST(req: NextRequest, context: { params: { portfolioId: string } }) {
+export async function POST(req: NextRequest ,context: { params: { portfolioId: string } } ) {
     try {
         await dbConnect();
+        const { portfolioId } = context.params;
+    console.log("Portfolio ID:", portfolioId);
+
         const { name, price ,stockId} = await req.json();
         console.log(stockId,"stock id in add stockkkkkkkkkkkkkkkkkkk")
         if (!name || !price) {
             return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
         }
 
-        const { portfolioId } = await Promise.resolve(context.params); // Ensuring params are awaited
+        // const { portfolioId } = await Promise.resolve(context.params); // Ensuring params are awaited
         console.log(portfolioId,"portfolioid in add stockkkkkkkkkkkkk")
         // const addStock=new Stock({name,current_price:price,category,status,exchange,industry})
         
@@ -61,15 +66,18 @@ export async function POST(req: NextRequest, context: { params: { portfolioId: s
 
 
 import mongoose from "mongoose";
-export async function DELETE(req: NextRequest, context: { params: { portfolioId: string } }) {
+export async function DELETE(req: NextRequest,context: { params: { portfolioId: string } }) {
     try {
         await dbConnect();
-        const { portfolioId } = await Promise.resolve(context.params); // ✅ Correctly extracting params
-        const { stockId } = await req.json();
-
+           const { stockId } = await req.json();
+           const { portfolioId } = context.params;
+           console.log("Portfolio ID:", portfolioId);
+       
         console.log("Received Portfolio ID:", portfolioId, "Stock ID:", stockId, "in delete stockkkkkkkkkkkkkkk");
 
-        
+        if (!portfolioId) {
+            return NextResponse.json({ message: "Invalid portfolio ID" }, { status: 400 });
+        }
         const convertedPortfolioId = new mongoose.Types.ObjectId(portfolioId);
         const convertedStockId = new mongoose.Types.ObjectId(stockId);
 
