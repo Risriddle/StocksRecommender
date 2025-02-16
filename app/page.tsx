@@ -13,9 +13,9 @@ export default function Home() {
             Make informed investment decisions with our AI-powered stock analysis
           </p>
           <div className="flex gap-4 justify-center">
-            <Link href="/auth/signup">
+            {/* <Link href="/auth/signup">
               <Button size="lg">Get Started</Button>
-            </Link>
+            </Link> */}
             {/* <Link href="/stocks">
               <Button variant="outline" size="lg">View Recommendations</Button>
             </Link> */}
