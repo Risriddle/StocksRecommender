@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import { User } from "@/lib/db/models/User";
 
-export async function DELETE(req: NextRequest, context: { params: { id?: string } }) {
+export async function DELETE(req: NextRequest, context: { params?: { id?: string } }) {
     try {
-        const { id } = await Promise.resolve(context.params); 
+        const  id  = context.params?.id
 
         if (!id) {
             return NextResponse.json({ message: "User ID is required" }, { status: 400 });
