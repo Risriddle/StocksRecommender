@@ -54,21 +54,76 @@ const determineRecommendation = ({
 };
 
 // Update stock indicators and recommendations
+// export const updateStockData = async () => {
+//   try {
+//     await dbConnect();
+//     const stocks = await Stock.find();
+    
+//     for (const stock of stocks) {
+//       const response = await axios.get<StockAPIResponse>(`${API_BASE_URL}?stock=${stock.name}`);
+//       const stockData = response.data;
+//      console.log(stockData,"data from API");
+      
+//       // Calculate scores
+//       const scores = calculateScore(stockData);
+//       const { rec: recommendation, reason } = determineRecommendation(scores);
+
+//       // Update StockIndicator
+//       await StockIndicator.findOneAndUpdate(
+//         { stock_id: stock._id },
+//         { ...scores, last_updated: new Date(), recommendation },
+//         { upsert: true, new: true }
+//       );
+
+//       // Store new recommendation
+//       await Recommendation.create({
+//         stock_id: stock._id,
+//         recommendation,
+//         reason,
+//       });
+
+//       // Update stock status
+//       await Stock.findByIdAndUpdate(stock._id, { status: recommendation });
+
+//       console.log(`Updated: ${stock.symbol} -> ${recommendation}`);
+//     }
+//   } catch (error) {
+//     console.error("Error updating stocks:", error);
+//   } finally {
+//     mongoose.connection.close();
+//   }
+// };
+
+
 export const updateStockData = async () => {
   try {
     await dbConnect();
     const stocks = await Stock.find();
-    
+
     for (const stock of stocks) {
+      // Find stock indicator
+      const stockIndicator = await StockIndicator.findOne({ stock_id: stock._id });
+
+      // Calculate the date one week ago
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+      // Check if stockIndicator exists and if last_updated is recent
+      if (stockIndicator && stockIndicator.last_updated > oneWeekAgo) {
+        console.log(`Skipping ${stock.symbol}, last updated less than a week ago.`);
+        continue;
+      }
+
+      // Fetch new stock data from API
       const response = await axios.get<StockAPIResponse>(`${API_BASE_URL}?stock=${stock.name}`);
       const stockData = response.data;
-     console.log(stockData,"data from API");
-      
+      console.log(stockData, "data from API");
+
       // Calculate scores
       const scores = calculateScore(stockData);
       const { rec: recommendation, reason } = determineRecommendation(scores);
 
-      // Update StockIndicator
+      // Update or insert StockIndicator
       await StockIndicator.findOneAndUpdate(
         { stock_id: stock._id },
         { ...scores, last_updated: new Date(), recommendation },
