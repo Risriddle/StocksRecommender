@@ -4,10 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import { User } from "@/lib/db/models/User";
 
-export async function PUT(req: NextRequest, context: { params: { id?: string } }) {
+export async function PUT(req: NextRequest, context: { params?: { id?: string } }) {
     try {
         // ✅ Await the params correctly
-        const { id } = await Promise.resolve(context.params); 
+        const  id = context.params?.id; 
         console.log(id,"useriddddddddddddddddddddddddddddd")
         if (!id) {
             return NextResponse.json({ message: "User ID is required" }, { status: 400 });
