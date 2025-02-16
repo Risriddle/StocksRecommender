@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import calculateStockReturns from "@/lib/calculateReturns";
 
-export async function GET(req: NextRequest, { params }: { params: { stockId: string } }) {
+export async function GET(req: NextRequest, context: { params?: { stockId?: string } }) {
     try {
         await dbConnect();
-        const { stockId } = await Promise.resolve(params);
+        const  stockId  = context.params?.stockId;
 
         console.log(stockId, "Stock ID received");
 
