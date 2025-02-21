@@ -376,7 +376,7 @@ const handleUpdatePortfolio = async (portfolioId:string) => {
           <DialogHeader>
             <DialogTitle>No Portfolio Selected</DialogTitle>
           </DialogHeader>
-          <p>You haven't selected a portfolio. Would you like to create a new one for this stock?</p>
+          <p>You haven&apos;t selected a portfolio. Would you like to create a new one for this stock?</p>
           <Input
             type="text"
             placeholder="New Portfolio Name"
