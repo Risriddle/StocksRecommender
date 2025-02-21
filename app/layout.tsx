@@ -22,13 +22,13 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           <Navbar />
-          {/* <main className="container mx-auto px-4 py-8">
+          <main className="container mx-auto px-4 py-8">
             {children}
-          </main> */}
-           <ToastProvider>
+          </main>
+           {/* <ToastProvider>
       {children}
       <ToastViewport />
-    </ToastProvider>
+    </ToastProvider> */}
         </Providers>
       </body>
     </html>

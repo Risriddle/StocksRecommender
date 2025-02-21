@@ -2,9 +2,9 @@
 const nextConfig = {
   // output: 'export',
   output:undefined,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // eslint: {
+  //   ignoreDuringBuilds: true,
+  // },
   images: { unoptimized: true },
 };
 

@@ -9,6 +9,10 @@ const stockSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  currency:{
+    type: String,
+    required: true,
+  },
   industry: {
     type: String,
     required: true,
@@ -30,6 +34,7 @@ const stockSchema = new mongoose.Schema({
     enum: ["BUY", "HOLD", "SELL", "MONITOR", "TARGET"],
     required: true,
   },
+  
 })
 
 

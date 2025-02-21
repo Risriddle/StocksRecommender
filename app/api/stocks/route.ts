@@ -63,11 +63,12 @@ export async function GET(req: NextRequest) {
 
 
 
+
 export async function POST(req: NextRequest) {
   await dbConnect();
 
   try {
-    const { symbol, exchange, industry, category } = await req.json()
+    const { symbol,exchange,industry,category } = await req.json()
 
     if (!symbol) {
       return NextResponse.json({ error: "symbol is required" }, { status: 400 });
@@ -84,7 +85,9 @@ export async function POST(req: NextRequest) {
     );
 
 
-
+  // const stockDetails=await axios.get(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${apiKey}`)
+  // console.log(stockDetails)
+  
 
 // console.log(response.data,"response from the apiiiiiiiiiiiiiiiiiiiiii")
 const timeSeries = response.data["Time Series (Daily)"];
@@ -104,11 +107,28 @@ if (!timeSeries) return NextResponse.json({ error: "Failed to fetch stock price"
      
     }
 
+    // "Exchange": "NYSE",
+    // "Currency": "USD",
+    // "Country": "USA",
+    // "Sector": "TECHNOLOGY",
+    // "Industry": "COMPUTER & OFFICE EQUIPMENT",
+
+    // const newStock = {
+    //   name: stockDetails.data.Name,
+    //   exchange: stockDetails.data.Exchange,
+    //   industry: stockDetails.data.Industry || "N/A",
+    //   category: stockDetails.data.Category || "N/A",
+    //   currency:stockDetails.data.Currency || "N/A",
+    //   current_price: latestPrice || 0,
+    //   status: "MONITOR",
+    // };
+
     const newStock = {
         name: symbol,
         exchange: exchange,
         industry: industry || "N/A",
         category: category || "N/A",
+        currency:"N/A",
         current_price: latestPrice || 0,
         status: "MONITOR",
       };
@@ -148,25 +168,25 @@ const NewStock=await Stock.findOne({name:symbol})
 
 
 
-// 📌 DELETE: Delete stock from MongoDB
-export async function DELETE(req: NextRequest) {
-    await dbConnect();
+// // 📌 DELETE: Delete stock from MongoDB
+// export async function DELETE(req: NextRequest) {
+//     await dbConnect();
 
-    try {
-        const { searchParams } = new URL(req.url);
-        const id = searchParams.get('id');
+//     try {
+//         const { searchParams } = new URL(req.url);
+//         const id = searchParams.get('id');
 
-        if (!id) {
-            return NextResponse.json({ error: 'Stock ID is required' }, { status: 400 });
-        }
+//         if (!id) {
+//             return NextResponse.json({ error: 'Stock ID is required' }, { status: 400 });
+//         }
 
-        await Stock.findByIdAndDelete(id);
-        await StockIndicator.findOneAndDelete({stock_id:id});
-        await Recommendation.findOneAndDelete({stock_id:id});
+//         await Stock.findByIdAndDelete(id);
+//         await StockIndicator.findOneAndDelete({stock_id:id});
+//         await Recommendation.findOneAndDelete({stock_id:id});
        
 
-        return NextResponse.json({ success: true, message: 'Stock deleted successfully' }, { status: 200 });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-}
+//         return NextResponse.json({ success: true, message: 'Stock deleted successfully' }, { status: 200 });
+//     } catch (error: any) {
+//         return NextResponse.json({ error: error.message }, { status: 500 });
+//     }
+// }

@@ -31,7 +31,7 @@ export default function StockManagement() {
       } finally {
         setLoading(false);
       }
-    };
+    };    
 
     fetchStocks();
   }, []);
@@ -53,7 +53,9 @@ export default function StockManagement() {
       try {
         const response = await fetch(`/api/stocks/search?q=${debouncedQuery}`);
         const data = await response.json();
-        setSearchResults(data.quotes || []);
+        console.log(data,"adata from searchhhhhhhhhh")
+        setSearchResults(data || []);
+        console.log(searchResults,"search resultssssssssss")
       } catch (error) {
         console.error("Error fetching stock data:", error);
       }
@@ -78,7 +80,7 @@ export default function StockManagement() {
       const response = await fetch("/api/stocks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ symbol, exchange, industry, category }),
+        body: JSON.stringify({ symbol,exchange,industry,category }),
       });
 
       const result = await response.json();
@@ -95,7 +97,7 @@ export default function StockManagement() {
   const handleDeleteStock = async (stockId: string) => {
     try {
       setLoading(true);
-      await fetch(`/api/stocks?id=${stockId}`, {
+      await fetch(`/api/stocks/${stockId}`, {
         method: "DELETE",
       });
 
@@ -140,7 +142,7 @@ export default function StockManagement() {
                 className="p-2 cursor-pointer hover:bg-gray-700 rounded-lg"
                 onClick={() => handleAddStock(stock)}
               >
-                {stock.shortname} ({stock.symbol}) - {stock.exchange}
+                 ({stock.symbol}) {stock.longname}
               </li>
             ))}
           </ul>
