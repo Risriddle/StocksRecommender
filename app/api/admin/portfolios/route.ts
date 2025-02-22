@@ -4,27 +4,29 @@ import { Portfolio } from "@/lib/db/models/Portfolio";
 import { User } from "@/lib/db/models/User";
 
 
-// Get all standard portfolios
-export async function GET(req: NextRequest) {
+
+
+export async function GET(req) {
     try {
         await dbConnect();
 
-        // Fetch only portfolios where the user_id belongs to an admin
-        const portfolios = await Portfolio.find()
-            .populate({
-                path: "user_id",
-                select: "role", // Fetch only the role field for efficiency
-            });
-console.log(portfolios,"0000000000000000000000000000000")
-        // Filter portfolios where the associated user is an admin
-        const adminPortfolios = portfolios.filter(portfolio => portfolio.user_id?.role === "admin");
-console.log(adminPortfolios,"9999999999999999999999999999999999")
+        // Get all admin user IDs
+        const adminUsers = await User.find({ role: "admin" }, "_id");
+        const adminUserIds = adminUsers.map(user => user._id);
+
+        // Fetch portfolios where user_id is in the list of admin IDs
+        const adminPortfolios = await Portfolio.find({ user_id: { $in: adminUserIds } });
+
         return NextResponse.json(adminPortfolios, { status: 200 });
     } catch (error) {
         console.error("Error fetching admin portfolios ❌", error);
-        return NextResponse.json({ message: "Failed to fetch portfolios" }, { status: 500 });
+        return NextResponse.json(
+            { message: "Failed to fetch portfolios" },
+            { status: 500 }
+        );
     }
 }
+
 
 
 
