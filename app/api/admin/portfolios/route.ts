@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import { Portfolio } from "@/lib/db/models/Portfolio";
-
+import { User } from "@/lib/db/models/User";
 
 
 // Get all standard portfolios

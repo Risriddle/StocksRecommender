@@ -449,7 +449,7 @@ export async function updateNewStock(stockId: string): Promise<boolean> {
 
     const scores = calculateScore(stockData);
     const recommendation = determineRecommendation(scores);
-
+console.log(scores,recommendation,"in update new stock==============================================")
     try {
       // Update or insert StockIndicator
       await StockIndicator.findOneAndUpdate(
@@ -468,6 +468,8 @@ export async function updateNewStock(stockId: string): Promise<boolean> {
         recommendation: recommendation.rec,
         reason: recommendation.reason,
       });
+
+       
 
       // Update stock status
       await Stock.findByIdAndUpdate(stock._id, { status: recommendation.rec });
