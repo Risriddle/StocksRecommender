@@ -10,3 +10,12 @@ const nextConfig = {
 
 module.exports = nextConfig;
 
+module.exports = {
+  webpack: (config) => {
+    // Increase timeout to 60 seconds
+    config.watchOptions = {
+      aggregateTimeout: 60000,
+    };
+    return config;
+  },
+}

@@ -33,8 +33,10 @@
 export interface Stock  {
   _id: string;
   name: string;
+  company:string;
   stock_id: string;
   category: string;
+  country:string;
   exchange:string;
   currency:string;
   industry:string;
@@ -52,7 +54,7 @@ export interface Stock  {
     oneMonthReturn?:number
     threeMonthReturn?: number
     growthLastWeek?:number
-    returnSince?: number
+    returnSinceAdded?: number
     returnSinceBuy?:number
     realizedReturn?: number
  

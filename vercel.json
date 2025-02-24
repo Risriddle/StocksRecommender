@@ -3,6 +3,10 @@
       {
         "path": "/api/weeklyUpdate",
         "schedule": "0 0 * * 0"
+      },
+      {
+        "path": "/api/fetchDailyStockPrice",
+        "schedule": "0 9 * * *"
       }
     ]
   }

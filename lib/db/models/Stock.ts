@@ -5,6 +5,14 @@ const stockSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  company:{
+    type: String,
+    required: true,
+  },
+  country:{
+    type: String,
+    required: true
+  },
   exchange: {
     type: String,
     required: true,

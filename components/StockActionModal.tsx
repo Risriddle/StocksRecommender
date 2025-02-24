@@ -1,20 +1,38 @@
 
+
 import React, { useEffect, useState } from "react";
 import { Stock } from '@/types/stock';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react"
+
 
 interface StockActionModalProps {
-  stock: Stock
+  stock: Stock;
   isPresent: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (portfolioId: string) => void; // Modified to accept portfolioId
   userId: string;
   status: string;
 }
 
-const StockActionModal: React.FC<StockActionModalProps> = ({ stock, isPresent, onClose, onConfirm,userId, status }) => {
+const StockActionModal: React.FC<StockActionModalProps> = ({
+  stock,
+  isPresent,
+  onClose,
+  onConfirm,
+  userId,
+  status
+}) => {
+
   const [portfolios, setPortfolios] = useState<{ _id: string; name: string }[]>([]);
   const [selectedPortfolio, setSelectedPortfolio] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+ 
 
+  // ... rest of your state and useEffect code ...
   useEffect(() => {
     if (status === "authenticated" && userId) {
       const fetchPortfolios = async () => {
@@ -27,6 +45,8 @@ const StockActionModal: React.FC<StockActionModalProps> = ({ stock, isPresent, o
           }
         } catch (error) {
           console.error("Error fetching portfolios:", error);
+        } finally {
+          setIsFetching(false);
         }
       };
       fetchPortfolios();
@@ -35,65 +55,103 @@ const StockActionModal: React.FC<StockActionModalProps> = ({ stock, isPresent, o
 
   const handleConfirm = async () => {
     if (!selectedPortfolio) return;
-     console.log(selectedPortfolio,"portfolio idddddddddd")
+    setIsLoading(true);
+    
     try {
-      const response = await fetch(`/api/portfolios/${selectedPortfolio}/stocks`, {
-        method: isPresent ? "DELETE" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stock }),
-      });
-
-      if (response.ok) {
-        
-        onConfirm();
-        onClose();
-      } else {
-        console.error("Failed to update portfolio");
-      }
+      // Call the parent's onConfirm with the selected portfolio ID
+      await onConfirm(selectedPortfolio);
+      onClose();
     } catch (error) {
       console.error("Error updating portfolio:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
-
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-      <div className="bg-black p-6 rounded-lg shadow-lg w-96">
-        <h2 className="text-lg font-semibold mb-4">
-          {isPresent ? "Remove Stock" : "Add Stock"}
-        </h2>
-        <p>Choose a portfolio to {isPresent ? "remove" : "add"} {stock.name}:</p>
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>
+            {isPresent ? "Remove Stock from Portfolio" : "Add Stock to Portfolio"}
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="py-6">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <div className="h-12 w-12 rounded bg-muted flex items-center justify-center">
+                <span className="text-xl font-semibold">{stock.name}</span>
+              </div>
+              <div>
+                {/* <h3 className="font-medium">{stock.name}</h3> */}
+                <p className="text-sm text-muted-foreground">{stock.company}</p>
+              </div>
+            </div>
 
-        {portfolios.length > 0 ? (
-          <select
-            className="w-full mt-2 p-2 border rounded"
-            value={selectedPortfolio}
-            onChange={(e) => setSelectedPortfolio(e.target.value)}
-          >
-            {portfolios.map((portfolio) => (
-              <option key={portfolio._id} value={portfolio._id}>
-                {portfolio.name}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <p className="text-gray-500 mt-2">No portfolios found.</p>
-        )}
-
-        <div className="flex justify-end mt-4">
-          <button className="px-4 py-2 bg-gray-300 rounded mr-2" onClick={onClose}>
-            Cancel
-          </button>
-          <button
-            className={`px-4 py-2 ${isPresent ? "bg-red-500" : "bg-blue-500"} text-white rounded`}
-            onClick={handleConfirm}
-            disabled={!selectedPortfolio}
-          >
-            {isPresent ? "Remove" : "Add"}
-          </button>
+            {isFetching ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : portfolios.length > 0 ? (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Select Portfolio
+                </label>
+                <Select
+                  value={selectedPortfolio}
+                  onValueChange={setSelectedPortfolio}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a portfolio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {portfolios.map((portfolio) => (
+                      <SelectItem key={portfolio._id} value={portfolio._id}>
+                        {portfolio.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <div className="text-center py-4 text-muted-foreground">
+                <p>No portfolios found.</p>
+                <p className="text-sm mt-1">Create a portfolio to add stocks.</p>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant={isPresent ? "destructive" : "default"}
+            onClick={handleConfirm}
+            disabled={!selectedPortfolio || isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {isPresent ? "Removing..." : "Adding..."}
+              </>
+            ) : (
+              isPresent ? "Remove Stock" : "Add Stock"
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
 export default StockActionModal;
+
+
+ 
+

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+
 const stockIndicatorSchema = new mongoose.Schema({
   stock_id: {
     type: mongoose.Schema.Types.ObjectId,

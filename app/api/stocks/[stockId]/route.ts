@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, context: { params?: { stockId?: stri
         }
 
         const returns = await calculateStockReturns(stockId);
-          
+        console.log(returns,"returns in api/stock/stockId--------------------------------------------------")
         if (!returns) {
             return NextResponse.json({ message: "Returns data not found" }, { status: 404 });
         }

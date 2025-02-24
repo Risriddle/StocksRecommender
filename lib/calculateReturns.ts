@@ -1,17 +1,17 @@
-
-
 import { StockPriceHistory } from "@/lib/db/models/StockPriceHistory";
 import { Stock } from "@/lib/db/models/Stock";
 
+
 async function calculateStockReturns(stockId: string) {
   try {
+
     // Fetch stock details
     const stock = await Stock.findById(stockId);
     if (!stock) throw new Error("Stock not found");
 
     // Fetch price history sorted by date
     const history = await StockPriceHistory.find({ stock_id: stockId }).sort({ date: 1 });
-    if (history.length < 2) throw new Error("Not enough price data to calculate returns.");
+    // if (history.length < 2) throw new Error("Not enough price data to calculate returns.");
 
     const latestPrice = history[history.length - 1].price;
     console.log(latestPrice,"latestpriec==================================================================")
@@ -19,29 +19,9 @@ async function calculateStockReturns(stockId: string) {
     let buyPrice = null;
     let sellPrice = null;
 
+
     // Find initial price closest to stock added date
-    // Find the first price after or equal to the stock's added date
-let addedDatePriceEntry = history.find(entry => new Date(entry.date) >= new Date(stock.added_date));
-
-if (!addedDatePriceEntry) {
-    // If no exact or later match, find the closest earlier price
-    addedDatePriceEntry = history.reduce((closest, entry) => {
-        const entryDate = new Date(entry.date);
-        const closestDate = closest ? new Date(closest.date) : null;
-
-        // Ensure it's before the added_date and closer than the previous closest
-        if (entryDate <= new Date(stock.added_date) && (!closestDate || entryDate > closestDate)) {
-            return entry;
-        }
-
-        return closest;
-    }, null);
-}
-
-// If a closest price entry is found, set it as the initial price
-if (addedDatePriceEntry) {
-    initialPrice = addedDatePriceEntry.price;
-}
+ 
 console.log(initialPrice,"initial price in calculate returnsssssssssssss")
 
     // Find first buy and sell prices
@@ -73,6 +53,13 @@ console.log(initialPrice,"initial price in calculate returnsssssssssssss")
     const threeMonthPrice = getPriceDaysAgo(90);
     const sixMonthPrice = getPriceDaysAgo(180);
 
+    // Calculate growth last week
+    const growthLastWeek = oneWeekPrice
+      ? calculateReturn(oneWeekPrice, latestPrice)?.toFixed(2)
+      : null;
+
+
+
     return {
       oneWeekReturn: oneWeekPrice ? calculateReturn(oneWeekPrice, latestPrice)?.toFixed(2) : null,
       oneMonthReturn: oneMonthPrice ? calculateReturn(oneMonthPrice, latestPrice)?.toFixed(2) : null,
@@ -81,7 +68,10 @@ console.log(initialPrice,"initial price in calculate returnsssssssssssss")
       returnSinceAdded: initialPrice ? calculateReturn(initialPrice, latestPrice)?.toFixed(2) : null,
       returnSinceBuy: buyPrice ? calculateReturn(buyPrice, latestPrice)?.toFixed(2) : null,
       realizedReturn: buyPrice && sellPrice ? calculateReturn(buyPrice, sellPrice)?.toFixed(2) : null,
+      growthLastWeek
     };
+
+
   } catch (error) {
     console.error("Error calculating stock returns:", error instanceof Error ? error.message : "unknown");
     return null;
@@ -90,3 +80,5 @@ console.log(initialPrice,"initial price in calculate returnsssssssssssss")
 
 
 export default calculateStockReturns;
+
+

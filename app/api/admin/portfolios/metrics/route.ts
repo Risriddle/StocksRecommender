@@ -1,50 +1,80 @@
 
-
-
-
-
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import { Portfolio } from "@/lib/db/models/Portfolio";
 import { PortfolioStock } from "@/lib/db/models/PortfolioStock";
+import { Stock } from "@/lib/db/models/Stock";
+import { User } from "@/lib/db/models/User";
 import calculateStockReturns from "@/lib/calculateReturns";
-import {Stock} from "@/lib/db/models/Stock"
 
 export async function GET(req: NextRequest) {
     try {
         await dbConnect();
 
-        // Fetch portfolios and populate user role
-        const portfolios = await Portfolio.find()
-            .populate({
-                path: "user_id",
-                select: "role",
-            });
+        // Fetch portfolios without populating
+        const portfolios = await Portfolio.find({}, "_id user_id name");
 
-        const portfolioIds = portfolios.map(portfolio => portfolio._id);
+        // Fetch user roles separately
+        const userIds = portfolios.map(portfolio => portfolio.user_id);
+        const users = await User.find({ _id: { $in: userIds } }, "_id role");
 
-        // Fetch stocks separately using PortfolioStock model
-        const portfolioStocks = await PortfolioStock.find({ portfolio_id: { $in: portfolioIds } })
-            .populate({
-                path: "stock_id",
-                select: "name",
-            });
-
-        // Map stocks to their respective portfolios
-        const portfolioMap = portfolios.map(portfolio => {
-            const stocks = portfolioStocks.filter(stock => stock.portfolio_id.equals(portfolio._id));
-            return {
-                ...portfolio.toObject(),
-                stocks,
-            };
-        });
-
-        // console.log(portfolioMap, "Fetched Admin Portfolios");
+        // Create a map of user roles for quick lookup
+        const userRoleMap = new Map(users.map(user => [user._id.toString(), user.role]));
 
         // Filter only admin portfolios
-        const adminPortfolios = portfolioMap.filter(portfolio => portfolio.user_id?.role === "admin");
+        const adminPortfolios = portfolios.filter(portfolio => 
+            userRoleMap.get(portfolio.user_id.toString()) === "admin"
+        );
 
-        // console.log(adminPortfolios, "Admin Portfolios");
+        // Extract admin portfolio IDs
+        const portfolioIds = adminPortfolios.map(portfolio => portfolio._id);
+
+        // Fetch portfolio stocks with complete information
+        const portfolioStocks = await PortfolioStock.find(
+            { portfolio_id: { $in: portfolioIds } }
+        ).lean();
+
+        // Fetch current stock details
+        const stockIds = portfolioStocks.map(ps => ps.stock_id);
+        const stocks = await Stock.find(
+            { _id: { $in: stockIds } }
+        ).lean();
+
+        // Create a stock map for quick lookup
+        const stockMap = new Map(stocks.map(stock => [
+            stock._id.toString(), 
+            { 
+                name: stock.name,
+                company: stock.company,
+                currentPrice: stock.current_price,
+                status: stock.status
+            }
+        ]));
+
+        // Map portfolios with their stocks
+        const portfolioMap = adminPortfolios.map(portfolio => {
+            const portfolioStocksFiltered = portfolioStocks.filter(
+                ps => ps.portfolio_id.toString() === portfolio._id.toString()
+            );
+
+            const stocksWithDetails = portfolioStocksFiltered.map(ps => {
+                const stockDetails = stockMap.get(ps.stock_id.toString());
+                return {
+                    stock_id: ps.stock_id,
+                    name: stockDetails?.name || "Unknown",
+                    company: stockDetails?.company || "Unknown",
+                    addedPrice: ps.added_price,
+                    addedDate: ps.added_date,
+                    currentPrice: stockDetails?.currentPrice || 0,
+                    status: stockDetails?.status
+                };
+            });
+
+            return {
+                ...portfolio.toObject(),
+                stocks: stocksWithDetails,
+            };
+        });
 
         // Function to calculate portfolio metrics
         const calculatePortfolioMetrics = async (portfolio) => {
@@ -54,78 +84,78 @@ export async function GET(req: NextRequest) {
             let weekReturns = [];
             let monthReturns = [];
             let threeMonthReturns = [];
-            let returnSinceAdded = [];
-            let returnSinceBuy = [];
-            let requiredReturns = [];
-        
-            for (const stockEntry of portfolio.stocks) {
-                console.log(stockEntry)
-                const stock = stockEntry.stock_id;
-                if (!stock) continue;
-        
-                const stockReturnsData = await calculateStockReturns(stock._id);
-                if (!stockReturnsData) continue;
-        
-                // Assuming stockEntry.quantity represents how many units of stock are held
-                // const stockPrice = stockReturnsData.current_price || 0; // Use currentPrice if available
-                const stockData=await Stock.findById({_id:stock._id})
-                const stockPrice=stockData.current_price
+            let sixMonthReturns = [];
 
-                console.log(stockData.name,stockPrice,"current stock priceeeeeeeeeeeeeeeeeeeee")
-                const investedAmount = 1 * stockPrice; // Calculate investment based on price and quantity
-        
+            for (const stockEntry of portfolio.stocks) {
+                const stockReturnsData = await calculateStockReturns(stockEntry.stock_id.toString());
+                if (!stockReturnsData) continue;
+
+                // Calculate invested amount based on added price
+                const investedAmount = stockEntry.addedPrice;
+                const currentValue = stockEntry.currentPrice;
+
                 totalInvested += investedAmount;
-        
-                // Store individual stock returns
+                totalCurrentValue += currentValue;
+
+                const individualReturn = ((currentValue - investedAmount) / investedAmount) * 100;
+
                 stockReturns.push({
-                    stockName: stock.name,
-                    ...stockReturnsData,
+                    stockName: stockEntry.name,
+                    company: stockEntry.company,
+                    status: stockEntry.status,
                     investedAmount,
+                    currentValue,
+                    individualReturn: individualReturn.toFixed(2) + "%",
+                    ...stockReturnsData
                 });
-        
-                // Collect stock returns for averaging
+
+                // Add returns to their respective arrays if they exist
                 if (stockReturnsData.oneWeekReturn) weekReturns.push(parseFloat(stockReturnsData.oneWeekReturn));
                 if (stockReturnsData.oneMonthReturn) monthReturns.push(parseFloat(stockReturnsData.oneMonthReturn));
                 if (stockReturnsData.threeMonthReturn) threeMonthReturns.push(parseFloat(stockReturnsData.threeMonthReturn));
-                if (stockReturnsData.returnSinceAdded) returnSinceAdded.push(parseFloat(stockReturnsData.returnSinceAdded));
-                if (stockReturnsData.returnSinceBuy) returnSinceBuy.push(parseFloat(stockReturnsData.returnSinceBuy));
-                if (stockEntry.requiredReturn) requiredReturns.push(stockEntry.requiredReturn);
-        
-                // Portfolio-level calculations
-                if (stockReturnsData.returnSinceAdded) {
-                    totalCurrentValue += investedAmount * (1 + parseFloat(stockReturnsData.returnSinceAdded) / 100);
-                }
+                if (stockReturnsData.sixMonthReturn) sixMonthReturns.push(parseFloat(stockReturnsData.sixMonthReturn));
             }
-        
-            // Calculate total portfolio return
-            const portfolioReturn = totalInvested > 0 ? ((totalCurrentValue - totalInvested) / totalInvested) * 100 : 0;
-        
-            // Function to calculate average safely
-            const average = (arr) => (arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2) + "%" : "N/A");
-        
+
+            // Calculate overall portfolio return
+            const portfolioReturn = totalInvested > 0 
+                ? ((totalCurrentValue - totalInvested) / totalInvested) * 100 
+                : 0;
+
+            // Helper function to calculate average returns
+            const calculateAverage = (returns) => {
+                if (returns.length === 0) return "N/A";
+                const avg = returns.reduce((a, b) => a + b, 0) / returns.length;
+                return avg.toFixed(2) + "%";
+            };
+
             return {
                 _id: portfolio._id,
                 portfolioName: portfolio.name,
-                totalInvested,
-                totalCurrentValue,
+                totalInvested: totalInvested.toFixed(2),
+                totalCurrentValue: totalCurrentValue.toFixed(2),
                 portfolioReturn: portfolioReturn.toFixed(2) + "%",
-                avgWeekReturn: average(weekReturns),
-                avg1MonthReturn: average(monthReturns),
-                avg3MonthReturn: average(threeMonthReturns),
-                avgReturnSinceAdded: average(returnSinceAdded),
-                avgReturnSinceBuy: average(returnSinceBuy),
-                avgRequiredReturn: average(requiredReturns),
-                stockReturns,
+                metrics: {
+                    avgWeekReturn: calculateAverage(weekReturns),
+                    avg1MonthReturn: calculateAverage(monthReturns),
+                    avg3MonthReturn: calculateAverage(threeMonthReturns),
+                    avg6MonthReturn: calculateAverage(sixMonthReturns)
+                },
+                stockReturns: stockReturns.sort((a, b) => {
+                    // Sort by status priority: BUY > HOLD > MONITOR > SELL
+                    const statusPriority = { BUY: 0, HOLD: 1, MONITOR: 2, SELL: 3 };
+                    return statusPriority[a.status] - statusPriority[b.status];
+                })
             };
         };
-        
-        // Process each admin portfolio
-        const portfolioMetrics = await Promise.all(adminPortfolios.map(calculatePortfolioMetrics));
-// console.log(portfolioMetrics,"metrics========================")
+
+        const portfolioMetrics = await Promise.all(portfolioMap.map(calculatePortfolioMetrics));
+
         return NextResponse.json(portfolioMetrics, { status: 200 });
     } catch (error) {
         console.error("Error fetching admin portfolios ❌", error);
-        return NextResponse.json({ message: "Failed to fetch portfolios" }, { status: 500 });
+        return NextResponse.json(
+            { message: "Failed to fetch portfolios", error: error instanceof Error ? error.message : "Unknown error" }, 
+            { status: 500 }
+        );
     }
 }
-

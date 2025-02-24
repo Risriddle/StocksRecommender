@@ -1,41 +1,43 @@
 
+"use client"
 
-
-
-
-"use client";
-
-import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useParams,useRouter } from "next/navigation"
+import { useState,useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { ArrowUpIcon,ArrowLeft, ArrowDownIcon, LineChart } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface Portfolio {
-  name: string;
-  description: string;
-  riskLevel: string;
-  totalReturns?: string;
+  name: string
+  description: string
+  riskLevel: string
+  totalReturns?: string
 }
 
 interface Stock {
-  _id: string;
-  name: string;
-  exchange: string;
-  industry: string;
-  category: string;
-  current_price: number;
-  status: "BUY" | "HOLD" | "SELL" | "MONITOR";
+  _id: string
+  name: string
+  exchange: string
+  industry: string
+  category: string
+  current_price: number
+  status: "BUY" | "HOLD" | "SELL" | "MONITOR"
 }
 
 export default function PortfolioDetails() {
-  const { id: portfolioId } = useParams();
-  const [portfolioData, setPortfolioData] = useState<Portfolio | null>(null);
-  const [portfolioStocks, setPortfolioStocks] = useState<Stock[]>([]);
-  const [stockReturns, setStockReturns] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>("");
+  const { id: portfolioId } = useParams()
+  const router = useRouter()
+  const [portfolioData, setPortfolioData] = useState<Portfolio | null>(null)
+  const [portfolioStocks, setPortfolioStocks] = useState<Stock[]>([])
+  const [stockReturns, setStockReturns] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>("")
 
-  useEffect(() => {
+  // ... (keep existing fetch functions)
+    useEffect(() => {
     if (!portfolioId) return;
 
     const fetchPortfolioData = async () => {
@@ -72,7 +74,7 @@ export default function PortfolioDetails() {
             const response = await fetch(`/api/stocks/${stock._id}`);
             if (response.ok) {
               const stockReturn = await response.json();
-              returnsData[stock._id] = stockReturn.data?.sinceAdded ?? "N/A";
+              returnsData[stock._id] = stockReturn.data?.returnSinceAdded ?? "N/A";
             }
           })
         );
@@ -89,82 +91,189 @@ export default function PortfolioDetails() {
   
   }, [portfolioId]);
 
-  if (loading) return <p className="text-center text-gray-500">Loading portfolio data...</p>;
-  if (error) return <p className="text-center text-red-500">Error: {error}</p>;
+
+  if (loading) {
+    return (
+      <div className="space-y-6 p-6">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-8 w-[250px]" />
+            <Skeleton className="h-4 w-[400px] mt-2" />
+            <div className="flex gap-4 mt-4">
+              <Skeleton className="h-4 w-[100px]" />
+              <Skeleton className="h-4 w-[100px]" />
+            </div>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-[200px]" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Card className="w-[400px]">
+          <CardHeader className="text-center">
+            <CardTitle className="text-destructive">Error Loading Portfolio</CardTitle>
+            <CardDescription>{error}</CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    )
+  }
+
+  // const getStatusColor = (status: Stock["status"]) => {
+  //   switch (status) {
+  //     case "BUY":
+  //       return "bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/25"
+  //     case "SELL":
+  //       return "bg-red-500/15 text-red-700 hover:bg-red-500/25"
+  //     case "HOLD":
+  //       return "bg-amber-500/15 text-amber-700 hover:bg-amber-500/25"
+  //     case "MONITOR":
+  //       return "bg-blue-500/15 text-blue-700 hover:bg-blue-500/25"
+  //     default:
+  //       return "bg-gray-500/15 text-gray-700 hover:bg-gray-500/25"
+  //   }
+  // }
+
+  const getStatusStyle = (status: string) => {
+    switch (status?.toUpperCase()) {
+      case 'BUY':
+        return 'bg-green-100 text-green-800 px-2 py-1 rounded-md text-sm'
+      case 'SELL':
+        return 'bg-red-100 text-red-800 px-2 py-1 rounded-md text-sm'
+      case 'HOLD':
+        return 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-md text-sm'
+      case 'TARGET':
+        return 'bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-sm'
+      case 'MONITOR':
+        return 'bg-purple-100 text-purple-800 px-2 py-1 rounded-md text-sm'
+      default:
+        return 'bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-sm'
+    }
+  }
 
   return (
-    <div className="space-y-6 p-6 bg-gray-100 min-h-screen">
+    <div className="space-y-6 p-4 md:p-6 max-w-[1400px] mx-auto">
+      <Button variant="ghost" onClick={() => router.back()} className="mb-6">
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Portfolio
+      </Button>
       {/* Portfolio Overview */}
-      <Card className="shadow-lg rounded-lg bg-white">
-        <CardHeader>
-          <CardTitle className="text-3xl font-bold text-gray-800">Portfolio: {portfolioData?.name}</CardTitle>
-          <p className="text-lg text-gray-600">{portfolioData?.description}</p>
-          <p className="text-md text-gray-500">
-            Risk Level: <span className="font-semibold">{portfolioData?.riskLevel}</span>
-          </p>
-          {portfolioData?.totalReturns && (
-            <p className="text-md font-semibold text-green-600">
-              Total Returns: {portfolioData.totalReturns}%
-            </p>
-          )}
+      <Card className="transition-shadow duration-200 hover:shadow-lg">
+        <CardHeader className="space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <CardTitle className="text-2xl md:text-3xl font-bold">{portfolioData?.name}</CardTitle>
+              <CardDescription className="mt-2 text-base">{portfolioData?.description}</CardDescription>
+            </div>
+            <div className="flex items-center gap-4 flex-wrap">
+              <Badge variant="outline" className="text-base py-1 px-3">
+                Risk Level: {portfolioData?.riskLevel}
+              </Badge>
+              {portfolioData?.totalReturns && (
+                <div className="flex items-center gap-2 text-base font-medium">
+                  <Badge
+                    className={
+                      Number(portfolioData.totalReturns) >= 0
+                        ? "bg-emerald-500/15 text-green-500 hover:bg-emerald-500/25"
+                        : "bg-red-500/15 text-red-700 hover:bg-red-500/25"
+                    }
+                  >
+                    <span className="flex items-center gap-1 text-base">
+                      {Number(portfolioData.totalReturns) >= 0 ? (
+                        <ArrowUpIcon className="w-3 h-3" />
+                      ) : (
+                        <ArrowDownIcon className="w-3 h-3" />
+                      )}
+                      {portfolioData.totalReturns}%
+                    </span>
+                  </Badge>
+                  <span className="text-muted-foreground text-base">Total Returns</span>
+                </div>
+              )}
+            </div>
+          </div>
         </CardHeader>
       </Card>
 
       {/* Portfolio Holdings */}
-      <Card className="shadow-lg rounded-lg bg-white">
-        <CardHeader>
-          <CardTitle className="text-2xl font-semibold text-gray-800">Portfolio Holdings</CardTitle>
+      <Card className="transition-shadow duration-200 hover:shadow-lg">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-2xl font-semibold flex items-center gap-2">
+              <LineChart className="w-5 h-5 text-muted-foreground" />
+              Portfolio Holdings
+            </CardTitle>
+            <CardDescription>{portfolioStocks.length} stocks in portfolio</CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table className="min-w-full">
+          <div className="overflow-x-auto rounded-md border">
+            <Table>
               <TableHeader>
-                <TableRow className="bg-gray-200">
-                  <TableHead className="whitespace-nowrap px-4 py-2">Stock Name</TableHead>
-                  <TableHead className="whitespace-nowrap px-4 py-2">Exchange</TableHead>
-                  <TableHead className="whitespace-nowrap px-4 py-2">Industry</TableHead>
-                  <TableHead className="whitespace-nowrap px-4 py-2">Category</TableHead>
-                  <TableHead className="whitespace-nowrap px-4 py-2">Current Price</TableHead>
-                  <TableHead className="whitespace-nowrap px-4 py-2">Status</TableHead>
-                  <TableHead className="whitespace-nowrap px-4 py-2">Returns</TableHead>
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                  <TableHead>Stock Name</TableHead>
+                  <TableHead className="hidden md:table-cell">Exchange</TableHead>
+                  <TableHead className="hidden lg:table-cell">Industry</TableHead>
+                  <TableHead className="hidden xl:table-cell">Category</TableHead>
+                  <TableHead>Current Price</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Returns</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {portfolioStocks.length > 0 ? (
                   portfolioStocks.map((stock) => (
-                    <TableRow key={stock._id} className="hover:bg-gray-100">
-                      <TableCell className="px-4 py-2 font-medium text-gray-800">{stock.name}</TableCell>
-                      <TableCell className="px-4 py-2 text-gray-700">{stock.exchange}</TableCell>
-                      <TableCell className="px-4 py-2 text-gray-700">{stock.industry}</TableCell>
-                      <TableCell className="px-4 py-2 text-gray-700">{stock.category}</TableCell>
-                      <TableCell className="px-4 py-2 font-semibold text-green-500">
-                        ${stock.current_price.toFixed(2)}
+                    <TableRow key={stock._id} className="transition-colors hover:bg-muted/50">
+                      <TableCell className="font-medium text-base">{stock.name}</TableCell>
+                      <TableCell className="hidden md:table-cell text-base">{stock.exchange}</TableCell>
+                      <TableCell className="hidden lg:table-cell text-base">{stock.industry}</TableCell>
+                      <TableCell className="hidden xl:table-cell text-base">{stock.category}</TableCell>
+                      <TableCell className="font-medium text-green-400 text-base">${stock.current_price.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <Badge className={getStatusStyle(stock.status)}>{stock.status}</Badge>
                       </TableCell>
-                      <TableCell className="px-4 py-2">
-                        <span
-                          className={`px-3 py-1 text-white text-sm rounded-md ${
-                            stock.status === "BUY"
-                              ? "bg-green-500"
-                              : stock.status === "HOLD"
-                              ? "bg-yellow-500"
-                              : stock.status === "SELL"
-                              ? "bg-red-500"
-                              : stock.status === "MONITOR"
-                              ? "bg-blue-500"
-                              : "bg-gray-500"
-                          }`}
-                        >
-                          {stock.status}
-                        </span>
-                      </TableCell>
-                      <TableCell className="px-4 py-2 font-medium text-gray-800">
-                        {stockReturns[stock._id] ?? "N/A"}%
+                      <TableCell>
+                        {stockReturns[stock._id] ? (
+                          <Badge
+                            className={
+                              Number(stockReturns[stock._id]) >= 0
+                                ? "bg-emerald-500/15 text-green-500"
+                                : "bg-red-500/15 text-red-700"
+                            }
+                          >
+                            <span className="flex items-center gap-1 text-base">
+                              {Number(stockReturns[stock._id]) >= 0 ? (
+                                <ArrowUpIcon className="w-3 h-3" />
+                              ) : (
+                                <ArrowDownIcon className="w-3 h-3" />
+                              )}
+                              {stockReturns[stock._id]}%
+                            </span>
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">N/A</Badge>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-4 text-gray-500">
+                    <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                       No stocks available in this portfolio.
                     </TableCell>
                   </TableRow>
@@ -175,6 +284,6 @@ export default function PortfolioDetails() {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }
 
