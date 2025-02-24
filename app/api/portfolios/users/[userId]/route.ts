@@ -17,10 +17,12 @@ export async function GET(req: NextRequest, context: { params?: { userId?: strin
         }
 
         // Fetch user's portfolios
-        const portfolios = await Portfolio.find({ user_id: userId }).populate({
-            path: "user_id",
-            select: "role",
-        });
+        // const portfolios = await Portfolio.find({ user_id: userId }).populate({
+        //     path: "user_id",
+        //     select: "role",
+        // });
+
+        const portfolios = await Portfolio.find({ user_id: userId })
 
         if (!portfolios.length) {
             return NextResponse.json({ message: "No portfolios found" }, { status: 404 });
