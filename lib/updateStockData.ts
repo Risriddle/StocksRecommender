@@ -159,7 +159,7 @@ export const updateStockData = async (): Promise<void> => {
         }
 
         // Fetch new stock data from API
-        const response = await axios.get<StockAPIResponse>(`${API_BASE_URL}?stock=${stock.name}`);
+        const response = await axios.get<StockAPIResponse>(`${API_BASE_URL}?stock=${stock.name}`,{timeout:30000});
         const stockData = response.data;
         
         // Process stock data

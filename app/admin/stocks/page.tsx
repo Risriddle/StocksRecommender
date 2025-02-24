@@ -1,6 +1,5 @@
 
 
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -84,6 +83,7 @@ export default function StockManagement() {
       });
 
       const result = await response.json();
+      console.log(result,"--------------------------------")
       if (result.success) {
         setStocks([...stocks, result.stock]);
       }

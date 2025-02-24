@@ -163,7 +163,7 @@ export async function updateNewStock(stockId: string): Promise<boolean> {
 
     let stockData: StockAPIResponse;
     try {
-      const response = await axios.get<StockAPIResponse>(`${API_BASE_URL}?stock=${stock.name}`);
+      const response = await axios.get<StockAPIResponse>(`${API_BASE_URL}?stock=${stock.name}`,{timeout:30000});
       stockData = response.data;
       
       if (!stockData || typeof stockData !== 'object') {

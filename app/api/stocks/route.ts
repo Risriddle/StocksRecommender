@@ -76,6 +76,7 @@ export async function POST(req: NextRequest) {
 
      const his= await newEntry.save();
       console.log(his,"stock history saved----------------------------")
+      
       const update=await updateNewStock(NewStock._id)
       if(update){
         return NextResponse.json({ success: true, stock: NewStock });
