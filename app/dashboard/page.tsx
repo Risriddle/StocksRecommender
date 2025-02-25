@@ -115,6 +115,7 @@ export default function DashboardPage() {
   const fetchStockIndicators = async () => {
     try {
       setLoading(true);
+      const updateStockPrices=await fetch("/api/fetchDailyStockPrice")
       const response = await fetch("/api/stocks/indicators");
       const data = await response.json();
       if (data.success) {

@@ -14,10 +14,16 @@ export async function GET(req: NextRequest) {
     const stocks = await Stock.find({});
 
     for (const stock of stocks) {
-      const stockDate = new Date(stock.added_date).toISOString().split("T")[0];
+      // Check if today's price is already recorded in StockPriceHistory
+      const existingEntry = await StockPriceHistory.findOne({
+        stock_id: stock._id,
+        date: { $gte: new Date(today), $lt: new Date(today + "T23:59:59Z") },
+      });
 
-      // Skip stocks already updated today
-      if (stockDate === today) continue;
+      if (existingEntry) {
+        console.log(`Skipping ${stock.name}, already updated today.`);
+        continue; // Skip fetching price if already present
+      }
 
       // Fetch stock price from external API
       const response = await axios.get(
@@ -30,23 +36,18 @@ export async function GET(req: NextRequest) {
       // Update stock's current price
       await Stock.findByIdAndUpdate(stock._id, { current_price });
 
-      // Check if today's price is already recorded
-      const existingEntry = await StockPriceHistory.findOne({
+      // Save today's price in StockPriceHistory
+      await StockPriceHistory.create({
         stock_id: stock._id,
-        date: { $gte: new Date(today), $lt: new Date(today + "T23:59:59Z") },
+        date: new Date(),
+        price: current_price,
       });
-
-      if (!existingEntry) {
-        // Save today's price in StockPriceHistory
-        await StockPriceHistory.create({
-          stock_id: stock._id,
-          date: new Date(),
-          price: current_price,
-        });
-      }
     }
 
-    return NextResponse.json({ message: "Stock prices updated successfully" }, { status: 200 });
+    return NextResponse.json(
+      { message: "Stock prices updated successfully" },
+      { status: 200 }
+    );
 
   } catch (error: any) {
     console.error("Error fetching stocks:", error.message);

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import  dbConnect  from '@/lib/db/connect';
 import { Stock } from '@/lib/db/models/Stock';
 import axios from "axios";
-import  {updateNewStock}  from "@/lib/updateNewStock"; 
 import { StockPriceHistory } from "@/lib/db/models/StockPriceHistory";
 
 
@@ -12,7 +11,7 @@ export async function GET(req: NextRequest) {
   await dbConnect();
 
   try {
-    // const today = new Date().toISOString().split("T")[0]; 
+    
     const stocks = await Stock.find({}); // Fetch all stocks
     
     return NextResponse.json(stocks, { status: 200 });
@@ -43,9 +42,14 @@ export async function POST(req: NextRequest) {
     if (stock) return NextResponse.json({ error: "Stock already added" }, { status: 404 });
     
 
-    // Fetch stock price from Alpha Vantage
+    // Fetch stock price 
     const response = await axios.get(`http://13.126.252.191/stock-info?stock=${symbol}`);
+    console.log(response,"=====")
+    if(response.data.currentStockPrice==="N/A")
+    {
+      return NextResponse.json({ success: false,message:"Stock Data not available"},{status:500});
 
+    }
 
    const stockDetails=response.data
    console.log(stockDetails,"stock detailssssss on addd---------------------------")
@@ -77,11 +81,11 @@ export async function POST(req: NextRequest) {
      const his= await newEntry.save();
       console.log(his,"stock history saved---------------------------------------------------------------------")
       
-      const update=await updateNewStock(NewStock._id)
-      if(update){
-        return NextResponse.json({ success: true, stock: NewStock });
-       }
-      return NextResponse.json({ success: false},{status:500});
+      // const update=await updateNewStock(NewStock._id)
+      // if(update){
+      //   return NextResponse.json({ success: true, stock: NewStock });
+      //  }
+      return NextResponse.json({ success: true, stock: NewStock });
     }
 
    catch (error) {

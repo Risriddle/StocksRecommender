@@ -52,6 +52,29 @@ console.log(result,"---------------------------")
   };
 
 
+  const handleFetchStockPrice = async () => {
+    setUpdating(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch("/api/fetchDailyStockPrice");
+      const result = await response.json();
+      console.log(result,"---------------------------")
+      if (response.ok) {
+        setMessage("Stock prices updated successfully ✅");
+       
+      } else {
+        setMessage("Failed to update stock prices ❌");
+      }
+    } catch (error) {
+      console.error("Error fetching prices:", error);
+      setMessage("An error occurred while updating ❌");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Admin Dashboard</h1>
@@ -119,6 +142,19 @@ console.log(result,"---------------------------")
           <CardContent className="flex flex-col items-center gap-4">
             <Button className="w-full" onClick={handleRunRecommendations} disabled={updating}>
               {updating ? "Updating..." : "Manually Run Recommendations"}
+              {updating && <RefreshCcw className="ml-2 h-4 w-4 animate-spin" />}
+           </Button>
+            {message && <p className="text-sm text-gray-600">{message}</p>}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Stock Prices</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-4">
+            <Button className="w-full" onClick={handleFetchStockPrice} disabled={updating}>
+              {updating ? "Updating..." : "Manually Update Stock Prices"}
               {updating && <RefreshCcw className="ml-2 h-4 w-4 animate-spin" />}
            </Button>
             {message && <p className="text-sm text-gray-600">{message}</p>}

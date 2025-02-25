@@ -16,7 +16,7 @@ type Recs={
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
-
+   
     const stocks = await Stock.find().lean();
 
     const stocksWithDetails = await Promise.all(

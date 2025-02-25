@@ -6,6 +6,7 @@ import { StockIndicator } from "@/lib/db/models/StockIndicator";
 import { Stock } from "@/lib/db/models/Stock";
 import { Recommendation } from "@/lib/db/models/Recommendation";
 import dbConnect from "@/lib/db/connect";
+import { updateNewStock } from "./updateNewStock";
 
 const API_BASE_URL = "http://13.126.252.191";
 
@@ -149,7 +150,12 @@ export const updateStockData = async (): Promise<void> => {
       try {
         // Find stock indicator
         let stockIndicator = await StockIndicator.findOne({ stock_id: stock._id });
-        
+        if(stockIndicator==null){
+          console.log("in update new stock condition--------------------------------------------------------------------")
+          const res=await updateNewStock(stock._id)
+          console.log(res,stock.name,"new stock recccccccccccccccccccccccccccccccccccccccccccccccccccc")
+          continue
+        }
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 

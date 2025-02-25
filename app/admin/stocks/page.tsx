@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Trash2 } from "lucide-react"
+import { BadgeCheck, Trash2 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { updateNewStock } from "@/lib/updateNewStock"
 
 export default function StockManagement() {
   const [stocks, setStocks] = useState<any[]>([])
@@ -16,12 +17,16 @@ export default function StockManagement() {
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [loading, setLoading] = useState(false) // Loading state
   const [error, setError] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
     const fetchStocks = async () => {
       try {
         setLoading(true)
+        const updateStockPrices=await fetch("/api/fetchDailyStockPrice")
+        console.log(updateStockPrices,"in admin stocks ...update stock pricesssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss")
+        
         const response = await fetch("/api/stocks")
         const data = await response.json()
         if (data.success === false) {
@@ -131,6 +136,10 @@ export default function StockManagement() {
     }
   }
 
+
+ 
+
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto mt-6 p-6 bg-gray-900 text-white rounded-lg shadow-lg relative">
       {loading && (
@@ -140,6 +149,12 @@ export default function StockManagement() {
       )}
       {error && (
         <div className="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-lg z-50 animate-in fade-in slide-in-from-top-5 duration-300">
+          {error}
+        </div>
+      )}
+
+{message && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50 animate-in fade-in slide-in-from-top-5 duration-300">
           {error}
         </div>
       )}
@@ -213,6 +228,7 @@ export default function StockManagement() {
                         {stock.status}
                       </span>
                     </td>
+                   
                     <td className="py-3 px-4 text-center">
                       <Button
                         variant="outline"
