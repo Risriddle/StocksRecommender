@@ -5,6 +5,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import {useRouter} from "next/navigation"
 import { Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import MetricsSection from "@/components/MetricsSection";
@@ -32,6 +33,7 @@ const getTimeRange = (filter: string) => {
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
+  const router=useRouter();
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [filteredStocks, setFilteredStocks] = useState<Stock[]>(stocks);
   const [filters, setFilters] = useState({
@@ -162,6 +164,10 @@ export default function DashboardPage() {
       <div className="flex h-screen overflow-hidden">
         <div className="flex-1 flex flex-col overflow-hidden">
           <h1 className="text-3xl font-bold p-4 bg-background border-b">Stock Dashboard</h1>
+          <div className="flex gap-4 mt-4">
+                  <button onClick={() => router.push("/stocks/history")} className="px-4 py-2 bg-white text-black rounded-md">View Stock History</button>
+                  <button onClick={() => router.push("/stocks/compare")} className="px-4 py-2 bg-white text-black rounded-md">Compare Stocks</button>
+                </div>
           <div className="flex-1 flex overflow-hidden">
             <div className="flex-1 overflow-auto">
               <div className="p-4">
@@ -179,7 +185,7 @@ export default function DashboardPage() {
                 </div>
                 <FilterSection filters={filters} setFilters={setFilters} uniqueValues={uniqueValues} />
               </div>
-             
+              
               <div className="px-4">
                 <StockTable data={filteredStocks} onSort={handleSort}/>
               </div>
@@ -199,3 +205,5 @@ export default function DashboardPage() {
     </SidebarProvider>
   );
 }
+
+

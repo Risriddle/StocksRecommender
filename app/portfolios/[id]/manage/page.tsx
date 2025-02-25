@@ -21,6 +21,7 @@ interface Stock {
   stock_id: string;
   name: string
   company: string
+  currency:string;
   exchange: string
   industry: string
   stockReturn: number
@@ -279,6 +280,7 @@ export default function AddStockPage() {
                     <TableHead>Name</TableHead>
                     <TableHead>Symbol</TableHead>
                     <TableHead className="hidden md:table-cell">Industry</TableHead>
+                    <TableHead>Currency</TableHead>
                     <TableHead>Price</TableHead>
                     <TableHead>Stock Returns</TableHead>
                     <TableHead>Status</TableHead>
@@ -298,7 +300,8 @@ export default function AddStockPage() {
                         <TableCell className="font-medium text-base">{stock.company}</TableCell>
                         <TableCell className="text-base">{stock.name}</TableCell>
                         <TableCell className="hidden md:table-cell text-base">{stock.industry}</TableCell>
-                        <TableCell className="text-base text-green-500">${stock.current_price.toFixed(2)}</TableCell>
+                        <TableCell className="text-base">{stock.currency}</TableCell>
+                        <TableCell className="text-base text-green-500">{stock.current_price.toFixed(2)}</TableCell>
                         <TableCell className="text-base">
                       <span className={stock.stockReturn >= 0 ? "text-green-500" : "text-red-500"}>
                         {stock.stockReturn}%

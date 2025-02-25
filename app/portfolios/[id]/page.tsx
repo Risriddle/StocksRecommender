@@ -21,6 +21,7 @@ interface Stock {
   _id: string
   name: string
   exchange: string
+  currency:string
   industry: string
   category: string
   current_price: number
@@ -134,20 +135,7 @@ export default function PortfolioDetails() {
     )
   }
 
-  // const getStatusColor = (status: Stock["status"]) => {
-  //   switch (status) {
-  //     case "BUY":
-  //       return "bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/25"
-  //     case "SELL":
-  //       return "bg-red-500/15 text-red-700 hover:bg-red-500/25"
-  //     case "HOLD":
-  //       return "bg-amber-500/15 text-amber-700 hover:bg-amber-500/25"
-  //     case "MONITOR":
-  //       return "bg-blue-500/15 text-blue-700 hover:bg-blue-500/25"
-  //     default:
-  //       return "bg-gray-500/15 text-gray-700 hover:bg-gray-500/25"
-  //   }
-  // }
+ 
 
   const getStatusStyle = (status: string) => {
     switch (status?.toUpperCase()) {
@@ -230,6 +218,7 @@ export default function PortfolioDetails() {
                   <TableHead className="hidden md:table-cell">Exchange</TableHead>
                   <TableHead className="hidden lg:table-cell">Industry</TableHead>
                   <TableHead className="hidden xl:table-cell">Category</TableHead>
+                  <TableHead>Currency</TableHead>
                   <TableHead>Current Price</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Returns</TableHead>
@@ -243,7 +232,8 @@ export default function PortfolioDetails() {
                       <TableCell className="hidden md:table-cell text-base">{stock.exchange}</TableCell>
                       <TableCell className="hidden lg:table-cell text-base">{stock.industry}</TableCell>
                       <TableCell className="hidden xl:table-cell text-base">{stock.category}</TableCell>
-                      <TableCell className="font-medium text-green-400 text-base">${stock.current_price.toFixed(2)}</TableCell>
+                      <TableCell className="hidden xl:table-cell text-base">{stock.currency}</TableCell>
+                      <TableCell className="font-medium text-green-400 text-base">{stock.current_price.toFixed(2)}</TableCell>
                       <TableCell>
                         <Badge className={getStatusStyle(stock.status)}>{stock.status}</Badge>
                       </TableCell>

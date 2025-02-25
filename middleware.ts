@@ -13,7 +13,7 @@ export async function middleware(req: NextRequest) {
   // Define route groups
   const authRoutes = ["/auth/signin", "/auth/signup"];
   const adminRoutes = ["/admin", "/admin/portfolios", "/admin/users", "/admin/register", "/admin/stocks"];
-  const userRoutes = ["/dashboard"];
+  const userRoutes = ["/dashboard","/stocks/history","/stocks/compare"];
 
   // If accessing auth routes while already logged in, redirect to appropriate page
   if (token && authRoutes.some(route => pathname.startsWith(route))) {

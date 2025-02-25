@@ -21,6 +21,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@
 import { useRouter } from 'next/navigation';
 
 import { useSession } from "next-auth/react";
+import calculateStockReturns from '@/lib/calculateReturns';
 
 const MAX_PORTFOLIOS = 5;
 
@@ -162,8 +163,7 @@ console.log(userId,"user id in create portfoliossssssssss")
       
         try {
           const response = await fetch(`/api/admin/portfolios/stocks/search?query=${encodeURIComponent(searchQuery)}`);
-          // const response = await fetch(` https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${encodeURIComponent(searchQuery)}&apikey=${process.env.NEXT_PUBLIC_API_KEY}`);
-           if (!response.ok) throw new Error("Failed to search stocks");
+                    if (!response.ok) throw new Error("Failed to search stocks");
           
           const result = await response.json();
           console.log(result,"======",response,"searchhhhhhhhh")
@@ -347,16 +347,26 @@ const handleUpdatePortfolio = async (portfolioId:string) => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Stock Name</TableHead>
+                    <TableHead>Stock Company Name</TableHead>
+                    <TableHead>Stock Symbol</TableHead>
+                    <TableHead>Industry</TableHead>
+                    <TableHead>Exchange</TableHead>
                     <TableHead>Price</TableHead>
+                    <TableHead>Currency</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {searchResults.map((stock) => (
                     <TableRow key={stock._id}>
+                      <TableCell>{stock.company}</TableCell>
                       <TableCell>{stock.name}</TableCell>
-                      <TableCell>{stock.current_price}</TableCell>
+                      <TableCell>{stock.industry}</TableCell>
+                      <TableCell>{stock.exchange}</TableCell>
+                      <TableCell className='text-green-500'>{stock.current_price}</TableCell>
+                      <TableCell>{stock.currency}</TableCell>
+                      <TableCell>{stock.status}</TableCell>
                       <TableCell>
                         <Button variant="outline" size="sm" onClick={() => handleAddStock(stock)}>
                           Add to Portfolio
@@ -405,7 +415,7 @@ const handleUpdatePortfolio = async (portfolioId:string) => {
     portfolios.map((portfolio) => (
       <TableRow key={portfolio._id}>
         {/* Portfolio Name with Inline Editing */}
-        <TableCell>
+        <TableCell className='text-base'>
           {editId === portfolio._id ? (
             <Input
               type="text"
@@ -494,18 +504,29 @@ const handleUpdatePortfolio = async (portfolioId:string) => {
               <DialogClose />
             </DialogHeader>
             <Table>
+              
               <TableHeader>
                 <TableRow>
-                  <TableHead>Stock Name</TableHead>
+                  <TableHead>Stock Company</TableHead>
+                  <TableHead>Stock Symbol</TableHead>
+                  <TableHead>Stock Industry</TableHead>
+                  <TableHead>Stock Exchange</TableHead>
                   <TableHead>Price</TableHead>
+                  <TableHead>Currency</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {stocks.map((stock) => (
                   <TableRow key={stock._id}>
+                    <TableCell>{stock.company}</TableCell>
                     <TableCell>{stock.name}</TableCell>
-                    <TableCell className="text-green-500">${stock.current_price}</TableCell>
+                    <TableCell>{stock.industry}</TableCell>
+                    <TableCell>{stock.exchange}</TableCell>
+                    <TableCell className="text-green-500">{stock.current_price}</TableCell>
+                    <TableCell>{stock.currency}</TableCell>
+                    <TableCell>{stock.status}</TableCell>
                     <TableCell>
                       <Button variant="destructive" size="sm" onClick={() => deleteStock(stock.stock_id)}>
                         Remove

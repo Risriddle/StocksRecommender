@@ -1,65 +1,36 @@
-import { NextResponse,NextRequest } from "next/server";
-import  dbConnect  from "@/lib/db/connect";
+import { NextResponse } from "next/server";
+import dbConnect from "@/lib/db/connect"; 
 import { StockPriceHistory } from "@/lib/db/models/StockPriceHistory";
-import { format } from "date-fns";
 
-export async function GET(req:NextRequest) {
+export async function GET(req) {
   try {
-    await dbConnect(); // Ensure MongoDB is connected
+    await dbConnect();
+    const { searchParams } = new URL(req.url);
+    const period = searchParams.get("period") || "1M";
+    const stockId = searchParams.get("stockId"); // Get stock ID from query params
 
-    const url = new URL(req.url);
-    const period = url.searchParams.get("period") || "1M";
-
-    // Define the date range based on the selected period
-    const endDate = new Date();
-    let startDate = new Date();
-
-    switch (period) {
-      case "1W":
-        startDate.setDate(endDate.getDate() - 7);
-        break;
-      case "1M":
-        startDate.setMonth(endDate.getMonth() - 1);
-        break;
-      case "3M":
-        startDate.setMonth(endDate.getMonth() - 3);
-        break;
-      case "6M":
-        startDate.setMonth(endDate.getMonth() - 6);
-        break;
-      case "1Y":
-        startDate.setFullYear(endDate.getFullYear() - 1);
-        break;
-      default:
-        startDate = new Date("2000-01-01"); // All-time data
+    if (!stockId) {
+      return NextResponse.json({ error: "Stock ID is required" }, { status: 400 });
     }
 
-    // Fetch stock data within the date range
-    const stocks = await StockPriceHistory.find({
-      date: { $gte: startDate, $lte: endDate },
-    }).populate("stock_id", "name");
+    let startDate = new Date();
+    switch (period) {
+      case "1W": startDate.setDate(startDate.getDate() - 7); break;
+      case "1M": startDate.setMonth(startDate.getMonth() - 1); break;
+      case "3M": startDate.setMonth(startDate.getMonth() - 3); break;
+      case "6M": startDate.setMonth(startDate.getMonth() - 6); break;
+      case "1Y": startDate.setFullYear(startDate.getFullYear() - 1); break;
+      case "ALL": startDate = new Date(0); break;
+      default: return NextResponse.json({ error: "Invalid period" }, { status: 400 });
+    }
 
-    type StockEntry = {
-        date: string;
-        [key: string]: number | string; 
-      };
-      
-      const formattedData = stocks.reduce<StockEntry[]>((acc, stock) => {
-        const formattedDate = format(stock.date, "MMM dd");
-      
-        const existingEntry = acc.find((entry) => entry.date === formattedDate);
-        if (existingEntry) {
-          existingEntry[stock.stock_id.name] = stock.price;
-        } else {
-          acc.push({ date: formattedDate, [stock.stock_id.name]: stock.price });
-        }
-      
-        return acc;
-      }, []);
-      
-    return NextResponse.json(formattedData);
+    const priceHistory = await StockPriceHistory.find({
+      stock_id: stockId, // Filter by stock_id
+      date: { $gte: startDate },
+    }).sort({ date: 1 });
+
+    return NextResponse.json(priceHistory, { status: 200 });
   } catch (error) {
-    console.error("Error fetching stock price history:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -158,7 +158,7 @@ export default function StockTable({ data, onSort }: StockTableProps) {
                   <TableCell className="text-base">{stock.exchange ?? "N/A"}</TableCell>
                   <TableCell className="text-base">{stock.currency ?? "N/A"}</TableCell>
                   <TableCell className="font-semibold text-primary text-base text-green-400">
-                    ${stock.current_price?.toFixed(2) ?? "N/A"}
+                    {stock.current_price?.toFixed(2) ?? "N/A"}
                   </TableCell>
                   <TableCell className="text-base">{stock.country ?? "N/A"}</TableCell>
                   <TableCell className="text-base">{renderPercentage(stock.returns?.growthLastWeek)}</TableCell>
