@@ -150,6 +150,7 @@ export const updateStockData = async (): Promise<void> => {
       try {
         // Find stock indicator
         let stockIndicator = await StockIndicator.findOne({ stock_id: stock._id });
+        
         if(stockIndicator==null){
           console.log("in update new stock condition--------------------------------------------------------------------")
           const res=await updateNewStock(stock._id)

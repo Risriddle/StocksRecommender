@@ -13,6 +13,9 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [updatingPrice, setUpdatingPrice] = useState(false);
+  const [messagePrice, setMessagePrice] = useState<string | null>(null);
+
 
   const [stats, setStats] = useState<{ totalUsers: string; activeStocks: string; portfolios: string } | null>(null);
 
@@ -53,24 +56,24 @@ console.log(result,"---------------------------")
 
 
   const handleFetchStockPrice = async () => {
-    setUpdating(true);
-    setMessage(null);
+    setUpdatingPrice(true);
+    setMessagePrice(null);
 
     try {
       const response = await fetch("/api/fetchDailyStockPrice");
       const result = await response.json();
       console.log(result,"---------------------------")
       if (response.ok) {
-        setMessage("Stock prices updated successfully ✅");
+        setMessagePrice("Stock prices updated successfully ✅");
        
       } else {
-        setMessage("Failed to update stock prices ❌");
+        setMessagePrice("Failed to update stock prices ❌");
       }
     } catch (error) {
       console.error("Error fetching prices:", error);
-      setMessage("An error occurred while updating ❌");
+      setMessagePrice("An error occurred while updating ❌");
     } finally {
-      setUpdating(false);
+      setUpdatingPrice(false);
     }
   };
 
@@ -153,11 +156,11 @@ console.log(result,"---------------------------")
             <CardTitle>Stock Prices</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4">
-            <Button className="w-full" onClick={handleFetchStockPrice} disabled={updating}>
-              {updating ? "Updating..." : "Manually Update Stock Prices"}
-              {updating && <RefreshCcw className="ml-2 h-4 w-4 animate-spin" />}
+            <Button className="w-full" onClick={handleFetchStockPrice} disabled={updatingPrice}>
+              {updatingPrice ? "Updating..." : "Manually Update Stock Prices"}
+              {updatingPrice && <RefreshCcw className="ml-2 h-4 w-4 animate-spin" />}
            </Button>
-            {message && <p className="text-sm text-gray-600">{message}</p>}
+            {messagePrice && <p className="text-sm text-gray-600">{messagePrice}</p>}
           </CardContent>
         </Card>
       </div>
