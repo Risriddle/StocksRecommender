@@ -48,11 +48,10 @@ export async function DELETE(req: NextRequest, context: { params?: { stockId?: s
     }
     try {
       
-     
-
-        await Stock.findByIdAndDelete(stockId);
         await StockIndicator.deleteMany({stock_id:stockId});
         await Recommendation.deleteMany({stock_id:stockId});
+        await Stock.findByIdAndDelete(stockId);
+       
        
 
         return NextResponse.json({ success: true, message: 'Stock deleted successfully' }, { status: 200 });
