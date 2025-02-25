@@ -128,6 +128,7 @@ console.log(userId,"user id in create portfoliossssssssss")
           if (!response.ok) throw new Error("Failed to fetch stocks");
       
           const stocks = await response.json();
+          console.log(stocks,"stocks loaded")
           setStocks(stocks || []);
         } catch (error) {
           console.error("Error fetching stocks ❌", error);
@@ -528,7 +529,7 @@ const handleUpdatePortfolio = async (portfolioId:string) => {
                     <TableCell>{stock.currency}</TableCell>
                     <TableCell>{stock.status}</TableCell>
                     <TableCell>
-                      <Button variant="destructive" size="sm" onClick={() => deleteStock(stock.stock_id)}>
+                      <Button variant="destructive" size="sm" onClick={() => deleteStock(stock._id)}>
                         Remove
                       </Button>
                     </TableCell>
