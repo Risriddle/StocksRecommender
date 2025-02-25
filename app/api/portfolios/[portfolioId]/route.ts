@@ -72,10 +72,7 @@ export async function GET(req: NextRequest, context: { params?: { portfolioId?: 
         }
 
         // Fetch portfolio details
-        const portfolios = await Portfolio.find({ _id: portfolioId }).populate({
-            path: "user_id",
-            select: "role",
-        });
+        const portfolios = await Portfolio.find({ _id: portfolioId })
 
         if (!portfolios.length) {
             return NextResponse.json({ message: "Portfolio not found" }, { status: 404 });
