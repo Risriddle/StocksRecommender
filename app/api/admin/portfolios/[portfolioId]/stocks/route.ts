@@ -79,13 +79,13 @@ export async function DELETE(req: NextRequest,context: { params?: { portfolioId?
         if (!portfolioId) {
             return NextResponse.json({ message: "Invalid portfolio ID" }, { status: 400 });
         }
-        const convertedPortfolioId = new mongoose.Types.ObjectId(portfolioId);
-        const convertedStockId = new mongoose.Types.ObjectId(stockId);
+        // const convertedPortfolioId = new mongoose.Types.ObjectId(portfolioId);
+        // const convertedStockId = new mongoose.Types.ObjectId(stockId);
 
-        console.log("Converted Portfolio ID:", convertedPortfolioId, "Converted Stock ID:", convertedStockId);
+        // console.log("Converted Portfolio ID:", convertedPortfolioId, "Converted Stock ID:", convertedStockId);
 
         // Check if the portfolio exists
-        const portfolio = await PortfolioStock.findOne({ portfolio_id: convertedPortfolioId });
+        const portfolio = await PortfolioStock.findOne({ portfolio_id:portfolioId });
         console.log(portfolio, "=============================");
         if (!portfolio) {
             return NextResponse.json({ message: "Portfolio not found" }, { status: 404 });
@@ -93,8 +93,8 @@ export async function DELETE(req: NextRequest,context: { params?: { portfolioId?
 
         // Delete the stock from the portfolio
         const deletedStock = await PortfolioStock.deleteOne({
-            stock_id: convertedStockId,
-            portfolio_id: convertedPortfolioId,
+            stock_id: stockId,
+            portfolio_id: portfolioId,
         });
 
         console.log(deletedStock, "to be deleted stockkkkkkkkkkkkkkkkkkkkkkkkk");
