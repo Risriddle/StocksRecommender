@@ -47,6 +47,8 @@ export default function StockManagement() {
     fetchStocks()
   }, [])
 
+
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedQuery(searchQuery)
