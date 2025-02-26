@@ -4,6 +4,8 @@ import { StockIndicator } from "@/lib/db/models/StockIndicator";
 import { Recommendation } from "@/lib/db/models/Recommendation"; 
 import dbConnect from "@/lib/db/connect";
 
+import calculateStockReturns from "@/lib/calculateReturns";
+
 type Recs={
   
     _id: string;
@@ -13,6 +15,11 @@ type Recs={
     date_recommended: Date;
   
 }
+type Stock={
+  _id:string;
+}
+
+
 export async function GET(req: NextRequest) {
   try {
     await dbConnect();
@@ -20,15 +27,17 @@ export async function GET(req: NextRequest) {
     const stocks = await Stock.find().lean();
 
     const stocksWithDetails = await Promise.all(
-      stocks.map(async (stock) => {
+      stocks.map(async (stock:Stock) => {
         const indicator = await StockIndicator.findOne({ stock_id: stock._id }).lean();
         const latestRecommendation:Recs = await Recommendation.findOne({ stock_id: stock._id })
           .sort({ date_recommended: -1 }) // Get the most recent recommendation
           .lean();
+        const returns = await calculateStockReturns(stock._id);
         console.log(latestRecommendation,"recssssssssssssss in stock/indicators api")
         return {
           ...stock,
           indicators: indicator || null,
+          returns:returns,
           // recommendation: latestRecommendation?.recommendation || null,
           date_recommended: latestRecommendation?.date_recommended || null,
         };

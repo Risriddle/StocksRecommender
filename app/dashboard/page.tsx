@@ -93,9 +93,7 @@ export default function DashboardPage() {
   }, [filters, stocks]);
 
 
-  useEffect(() => {
-    fetchStockIndicators();
-  }, []);
+
 
   useEffect(() => {
     const filtered = stocks.filter((stock) => {
@@ -121,12 +119,11 @@ export default function DashboardPage() {
       if (data.success) {
         const updatedStocks = await Promise.all(
           data.data.map(async (stock: Stock) => {
-            const response = await fetch(`/api/stocks/${stock._id}`);
-            const returnsData = await response.json();
             const isPresent = userId ? await isStockInUserPortfolio(userId, stock._id) : false;
-            return { ...stock, returns: returnsData.success ? returnsData.data : null, isPresent };
+            return { ...stock, isPresent };
           })
         );
+        console.log(updatedStocks,"updatddddddddddddd")
         setStocks(updatedStocks);
       }
     } catch (error) {
