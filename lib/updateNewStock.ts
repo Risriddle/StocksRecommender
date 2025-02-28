@@ -1,5 +1,4 @@
 
-
 import { StockIndicator } from "@/lib/db/models/StockIndicator";
 import { Recommendation } from "@/lib/db/models/Recommendation";
 import dbConnect from "@/lib/db/connect";
@@ -11,17 +10,26 @@ const API_BASE_URL = "http://13.126.252.191";
 type Rating = "High" | "Medium" | "Low";
 type Grade = "A" | "B" | "C" | "D" | "F";
 
+
+
 interface StockAPIResponse {
-  ["P/E (TTM)"]?: string;
-  ["EPS (TTM)"]?: string;
+  ["P/E (TTM)"]?: number;
+  ["EPS (TTM)"]?: number;
   ["Market Cap"]?: string;
+  ["Average Volume"]?: string;
   ["Previous Close"]?: string;
-  ["avg_price_target"]?: string;
+  ["Shares Outstanding"]?: string;
+  ["Ex-Dividend Date"]?: string;
+  ["Fwd Dividend (% Yield)"]?: string;
+  avg_price_target?: string;
   growth?: Grade;
+  highest_price_target?: string;
+  insdustry?: string;
+  lowest_price_target?: string;
   momentum?: Grade;
+  upside_to_avg_price_target?: string;
   value?: Grade;
-  ["lowest_price_target"]?: string;
-  ["upside_to_avg_price_target"]?: string;
+  vgm?: string;
 }
 
 interface StockScores {
@@ -68,8 +76,8 @@ const parseNumericValue = (value: string | undefined, defaultValue: number): num
 
 const calculateScore = (data: StockAPIResponse): StockScores => {
   try {
-    const peRatio = parseNumericValue(data["P/E (TTM)"], 100);
-    const eps = parseNumericValue(data["EPS (TTM)"], 1);
+    const peRatio = data["P/E (TTM)"]
+    const eps = data["EPS (TTM)"]
     const upside = parseNumericValue(data["upside_to_avg_price_target"], 0);
     const lowestTarget = parseNumericValue(data["lowest_price_target"], 0);
 
@@ -87,6 +95,7 @@ const calculateScore = (data: StockAPIResponse): StockScores => {
       value_rating: getRatingCategory(valueScore),
       risk_score: getRatingCategory(totalRisk),
       upside
+      
     };
   } catch (error) {
     console.error("Error calculating scores:", error);
@@ -164,8 +173,9 @@ export async function updateNewStock(stockId: string): Promise<boolean> {
     let stockData: StockAPIResponse;
     try {
       const response = await axios.get<StockAPIResponse>(`${API_BASE_URL}?stock=${stock.name}`,{timeout:30000});
+      console.log("FULL API RESPONSE:", JSON.stringify(response.data));
       stockData = response.data;
-      
+      console.log(stockData,"=================================stockData")
       if (!stockData || typeof stockData !== 'object') {
         throw new Error('Invalid API response format');
       }
@@ -183,6 +193,9 @@ console.log(scores,recommendation,"in update new stock==========================
         { stock_id: stock._id },
         { 
           ...scores, 
+          market_cap:stockData["Market Cap"],
+          volume:stockData["Average Volume"],
+          pe_ratio:stockData["P/E (TTM)"],
           last_updated: new Date(), 
           recommendation: recommendation.rec 
         },

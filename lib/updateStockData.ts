@@ -177,6 +177,9 @@ export const updateStockData = async (): Promise<void> => {
           { stock_id: stock._id },
           { 
             ...scores, 
+            market_cap:stockData["Market Cap"],
+            volume:stockData["Average Volume"],
+            pe_ratio:stockData["P/E (TTM)"],
             last_updated: new Date(), 
             recommendation: recommendation.rec 
           },

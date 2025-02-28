@@ -27,6 +27,15 @@ const stockIndicatorSchema = new mongoose.Schema({
     enum: ["High", "Medium", "Low"],
     required: true,
   },
+  volume:{
+    type:String
+  },
+  market_cap:{
+    type:String
+  },
+  pe_ratio:{
+    type:String
+  },
   last_updated: {
     type: Date,
     default: Date.now,

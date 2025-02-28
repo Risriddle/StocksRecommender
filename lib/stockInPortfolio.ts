@@ -8,30 +8,29 @@ import dbConnect from "@/lib/db/connect";
 import mongoose from "mongoose"; // Import mongoose for ObjectId
 
 
-export async function isStockInUserPortfolio(userId: string, stockId: string) {
+
+
+export async function getUserPortfolioStocks(userId: string): Promise<string[]> {
   try {
     await dbConnect();
-    console.log(userId, stockId, "user and stock id");
-  
-    // Convert userId and stockId to ObjectId
+    
     const userObjectId = new mongoose.Types.ObjectId(userId);
-    const stockObjectId = new mongoose.Types.ObjectId(stockId);
 
-    // Step 1: Find portfolios belonging to the user
-    const userPortfolios = await Portfolio.find({ user_id: userObjectId }).lean();
-    console.log(userPortfolios, "user portfolios");
+    // Step 1: Get all portfolio IDs for the user
+    const userPortfolios = await Portfolio.find({ user_id: userObjectId }).select("_id").lean();
 
-    if (!userPortfolios.length) return false; // No portfolios found for this user
+    if (!userPortfolios.length) return []; // No portfolios found
 
-    // Step 2: Check if the stock is in any of those portfolios
-    const stockInPortfolio = await PortfolioStock.findOne({
-      stock_id: stockObjectId,
-      portfolio_id: { $in: userPortfolios.map((p) => p._id) }, // Match any of the user's portfolios
-    });
+    const portfolioIds = userPortfolios.map((p) => p._id);
 
-    return !!stockInPortfolio; // Returns true if stock is found, false otherwise
+    // Step 2: Get all stock IDs from PortfolioStock for those portfolio IDs
+    const stocks = await PortfolioStock.find({ portfolio_id: { $in: portfolioIds } })
+      .select("stock_id")
+      .lean();
+
+    return stocks.map((s) => s.stock_id.toString()); // Convert ObjectIds to strings
   } catch (error) {
-    console.error("Error checking stock in portfolio:", error);
-    return false; // Default to false if there's an error
+    console.error("Error fetching user portfolio stocks:", error);
+    return [];
   }
 }
