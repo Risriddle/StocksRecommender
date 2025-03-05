@@ -320,3 +320,9 @@ export default function StockTable({
     </div>
   )
 }
+
+
+
+
+
+

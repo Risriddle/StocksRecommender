@@ -10,3 +10,8 @@ export const useStockStore = create<StockStore>((set) => ({
   stocks: [],
   setStocks: (stocks) => set({ stocks }),
 }));
+
+
+
+
+

@@ -34,3 +34,6 @@ export async function getUserPortfolioStocks(userId: string): Promise<string[]> 
     return [];
   }
 }
+
+
+
