@@ -285,7 +285,7 @@ interface StockStore {
   clearStocks: () => void
 }
 
-export const useStockStore = create<StockStore>()(
+const useStockStore = create<StockStore>()(
   persist(
     (set) => ({
       stocks: [],
