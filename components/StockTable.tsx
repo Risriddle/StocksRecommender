@@ -253,6 +253,15 @@ export default function StockTable({
                               <span className="text-muted-foreground">N/A</span>}
                           </TableCell>
                         )
+                        case "return_since_added":
+                          return (
+                            <TableCell key={column.key}>
+                              {typeof stock.returns?.returnSinceAdded === 'string' ? 
+                                renderPercentage(stock.returns?.returnSinceAdded) :
+                                 
+                                <span className="text-muted-foreground">N/A</span>}
+                            </TableCell>
+                          )
                       case "status":
                         return (
                           <TableCell key={column.key}>
@@ -267,6 +276,22 @@ export default function StockTable({
                             </span>
                           </TableCell>
                         )
+                        case "value_rating":
+                          return (
+                            <TableCell key={column.key}>
+                              <span className={getRiskStyle(stock.indicators?.value_rating)}>
+                                {stock.indicators?.value_rating ?? "N/A"}
+                              </span>
+                            </TableCell>
+                          )
+                          case "growth_rating":
+                            return (
+                              <TableCell key={column.key}>
+                                <span className={getRiskStyle(stock.indicators?.growth_rating)}>
+                                  {stock.indicators?.growth_rating ?? "N/A"}
+                                </span>
+                              </TableCell>
+                            )
                       case "date_recommended":
                       case "added_date":
                         return (
