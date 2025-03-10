@@ -1,32 +1,4 @@
-// export interface StockData {
-//     company: string;
-//     exchange: string;
-//     currency: string;
-//     currentPrice: number;
-//     priceChange: number;
-//     dateUpdated: string;
-//     returnSinceAdded: number;
-//     returnSinceBuy: number;
-//     requiredReturn: number;
-//     status: 'Buy' | 'Hold' | 'Sell';
-//     value: 'High' | 'Medium' | 'Low';
-//     growth: 'High' | 'Medium' | 'Low';
-//     weekReturn: number;
-//     monthReturn: number;
-//     threeMonthReturn: number;
-//     riskRating: 'High' | 'Medium' | 'Low';
-//     recommendedDate: string;
-//     industry: string;
-//     category: string;
-//     isPresent:boolean;
-//   }
-  
-//   export interface Watchlist {
-//     id: string;
-//     name: string;
-//     stocks: string[];
-//   }
-  
+
 
 
 
@@ -75,7 +47,12 @@ export interface Stock  {
 
 
 
+
+
+
+
 export interface Portfolio  {
   _id: string;
   name: string;
 };
+

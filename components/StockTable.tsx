@@ -126,7 +126,6 @@ export default function StockTable({
   const columnGroups = {
     view: { label: "", key: "view", alwaysVisible: true },
     stockInfo: { label: "Stock Info", key: "stock_info", alwaysVisible: true },
-    zacksRank: { label: "Zacks Rank", key: "zacks_rank", alwaysVisible: true },
     industry: { label: "Industry", key: "industry", alwaysVisible: true },
     returnSinceRec: { label: "Return Since Rec.", key: "return_since_rec", alwaysVisible: true },
     status: { label: "Status", key: "status", alwaysVisible: true },
@@ -345,6 +344,14 @@ export default function StockTable({
     </div>
   )
 }
+
+
+
+
+
+
+
+
 
 
 

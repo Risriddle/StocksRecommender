@@ -109,7 +109,7 @@ export default function StockDetails({ stock }: StockDetailsProps) {
         <div className="flex justify-between items-start">
           <div>
             <div className="flex items-center space-x-2 mb-1">
-              <CardTitle className="text-xl font-bold truncate">{stock.company}</CardTitle>
+              <CardTitle className="text-xl font-bold">{stock.company}</CardTitle>
               <Badge variant="outline" className="ml-2">
                 {stock.name}
               </Badge>

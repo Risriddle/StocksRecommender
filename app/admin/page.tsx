@@ -115,27 +115,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // const handleRunRecommendations = async () => {
-  //   setUpdating(true);
-  //   setMessage(null);
-
-  //   try {
-  //     const response = await fetch("/api/weeklyUpdate");
-  //     const result = await response.json();
-  //     console.log(result,"---------------------------")
-  //     if (response.ok) {
-  //       setMessage("Stock recommendations updated successfully ✅");
-       
-  //     } else {
-  //       setMessage("Failed to update recommendations ❌");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error running recommendations:", error);
-  //     setMessage("An error occurred while updating ❌");
-  //   } finally {
-  //     setUpdating(false);
-  //   }
-  // };
+  
 
   const handleFetchStockPrice = async () => {
     setUpdatingPrice(true);
@@ -222,6 +202,9 @@ export default function AdminDashboard() {
             </Link>
             <Link href="/admin/stocks">
               <Button className="w-full">Add Stocks</Button>
+            </Link>
+            <Link href="/admin/manage-stocks">
+              <Button className="w-full">Manage Stocks</Button>
             </Link>
             <Link href="/admin/register">
               <Button className="w-full">Create Admin</Button>
