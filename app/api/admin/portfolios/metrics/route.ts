@@ -5,7 +5,8 @@ import { Portfolio } from "@/lib/db/models/Portfolio";
 import { PortfolioStock } from "@/lib/db/models/PortfolioStock";
 import { Stock } from "@/lib/db/models/Stock";
 import { User } from "@/lib/db/models/User";
-import calculateStockReturns from "@/lib/calculateReturns";
+import { Returns} from "@/lib/db/models/Returns";
+
 
 export async function GET(req: NextRequest) {
     try {
@@ -87,7 +88,9 @@ export async function GET(req: NextRequest) {
             let sixMonthReturns = [];
 
             for (const stockEntry of portfolio.stocks) {
-                const stockReturnsData = await calculateStockReturns(stockEntry.stock_id.toString());
+                // console.log(stockEntry,"stockentryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
+                const stockReturnsData = await Returns.findOne({stock_id:stockEntry.stock_id});
+                console.log(stockReturnsData,"stockreturns in metrive--------------------------------------------")
                 if (!stockReturnsData) continue;
 
                 // Calculate invested amount based on added price
@@ -106,9 +109,9 @@ export async function GET(req: NextRequest) {
                     investedAmount,
                     currentValue,
                     individualReturn: individualReturn.toFixed(2) + "%",
-                    ...stockReturnsData
+                    stockReturnsData
                 });
-
+console.log(stockReturns,"stockreturns-oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
                 // Add returns to their respective arrays if they exist
                 if (stockReturnsData.oneWeekReturn) weekReturns.push(parseFloat(stockReturnsData.oneWeekReturn));
                 if (stockReturnsData.oneMonthReturn) monthReturns.push(parseFloat(stockReturnsData.oneMonthReturn));
@@ -117,9 +120,12 @@ export async function GET(req: NextRequest) {
             }
 
             // Calculate overall portfolio return
-            const portfolioReturn = totalInvested > 0 
-                ? ((totalCurrentValue - totalInvested) / totalInvested) * 100 
-                : 0;
+            // const portfolioReturn = totalInvested > 0 
+            //     ? ((totalCurrentValue - totalInvested) / totalInvested) * 100 
+            //     : 0;
+
+            const portfolioReturn=await Portfolio.findById(portfolio._id)
+            console.log(portfolioReturn,"portfolio returnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn")
 
             // Helper function to calculate average returns
             const calculateAverage = (returns) => {
@@ -133,18 +139,14 @@ export async function GET(req: NextRequest) {
                 portfolioName: portfolio.name,
                 totalInvested: totalInvested.toFixed(2),
                 totalCurrentValue: totalCurrentValue.toFixed(2),
-                portfolioReturn: portfolioReturn.toFixed(2) + "%",
+                portfolioReturn: portfolioReturn.portfolioReturn+"%",
                 metrics: {
                     avgWeekReturn: calculateAverage(weekReturns),
                     avg1MonthReturn: calculateAverage(monthReturns),
                     avg3MonthReturn: calculateAverage(threeMonthReturns),
                     avg6MonthReturn: calculateAverage(sixMonthReturns)
                 },
-                stockReturns: stockReturns.sort((a, b) => {
-                    // Sort by status priority: BUY > HOLD > MONITOR > SELL
-                    const statusPriority = { BUY: 0, HOLD: 1, MONITOR: 2, SELL: 3 };
-                    return statusPriority[a.status] - statusPriority[b.status];
-                })
+                stockReturns: stockReturns
             };
         };
 

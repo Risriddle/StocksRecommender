@@ -1,9 +1,10 @@
 
+
 "use client"
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
-import { ArrowUpIcon, ArrowDownIcon, ArrowUpDown, Eye } from "lucide-react"
+import { ArrowUpIcon, ArrowDownIcon, ArrowUpDown, Eye, Loader2 } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
@@ -28,19 +29,45 @@ export default function StockTable({
   const { data: session, status } = useSession()
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null)
   const [stocks, setStocks] = useState<Stock[]>(data)
+  const [stockDetails, setStockDetails] = useState<Stock>(null)
+  const [loadingStockId, setLoadingStockId] = useState<string | null>(null)
   const userId = session?.user?.id
 
   useEffect(() => {
     setStocks(data)
   }, [data])
 
+
+  console.log(data,"stocks in table")
   const handleStockAction = (stock: Stock) => {
     setSelectedStock(stock)
   }
 
-  const handleViewStock = (stock: Stock) => {
-    if (onViewStock) {
-      onViewStock(stock)
+  const handleViewStock = async (stock: Stock) => {
+    try {
+      setLoadingStockId(stock._id)
+      
+      // Call the API to fetch detailed stock indicators
+      const response = await fetch(`/api/stocks/stock-indicator?stock_id=${stock._id}`)
+      console.log(response,"response of stock-indicator in stocktable")
+      if (!response.ok) {
+        throw new Error(`Failed to fetch stock details: ${response.statusText}`)
+      }
+      
+      const detailedStock = await response.json()
+      console.log(detailedStock,"dddddddddddddddddddddddddddddddddddd")
+      
+      setStockDetails(detailedStock.data)
+    
+      // Once we have the detailed data, call the parent's onViewStock with the updated stock
+      if (onViewStock) {
+        onViewStock({ ...detailedStock.data })
+       
+      }
+    } catch (error) {
+      console.error("Error fetching stock details:", error)
+    } finally {
+      setLoadingStockId(null)
     }
   }
 
@@ -77,8 +104,6 @@ export default function StockTable({
       </span>
     )
   }
-
-   
 
   const getStatusStyle = (status: string) => {
     switch (status?.toUpperCase()) {
@@ -127,14 +152,14 @@ export default function StockTable({
     view: { label: "", key: "view", alwaysVisible: true },
     stockInfo: { label: "Stock Info", key: "stock_info", alwaysVisible: true },
     industry: { label: "Industry", key: "industry", alwaysVisible: true },
+    price: { label: "Current Price", key: "current_price" ,alwaysVisible: true},
+    exchange: { label: "Exchange", key: "exchange" ,alwaysVisible: true},
+    currency: { label: "Currency", key: "currency",alwaysVisible: true },
     returnSinceRec: { label: "Return Since Rec.", key: "return_since_rec", alwaysVisible: true },
     status: { label: "Status", key: "status", alwaysVisible: true },
     returns: { label: "Returns", key: "returns", alwaysVisible: true },
     // Additional column groups that are hidden by default
-    price: { label: "Current Price", key: "current_price" ,alwaysVisible: false},
-    exchange: { label: "Exchange", key: "exchange" ,alwaysVisible: false},
-    currency: { label: "Currency", key: "currency",alwaysVisible: false },
-    country: { label: "Country", key: "country" ,alwaysVisible: false},
+       country: { label: "Country", key: "country" ,alwaysVisible: false},
     addedDate: { label: "Date Added", key: "added_date",alwaysVisible: false },
     returnSinceAdded: { label: "Return Since Added", key: "return_since_added" ,alwaysVisible: false},
     returnSinceBuy: { label: "Return Since Buy", key: "return_since_buy" ,alwaysVisible: false},
@@ -144,7 +169,7 @@ export default function StockTable({
     riskRating: { label: "Risk Rating", key: "risk_score" ,alwaysVisible: false},
     dateRecommended: { label: "Recommended Date", key: "date_recommended" ,alwaysVisible: false},
     category: { label: "Category", key: "category" ,alwaysVisible: false},
-    action: { label: "Action", key: "action" ,alwaysVisible: false},
+    action: { label: "Action", key: "action" ,alwaysVisible: true},
   }
 
   // Filter column groups based on visibility settings
@@ -179,7 +204,7 @@ export default function StockTable({
             </TableHeader>
 
             <TableBody>
-              {stocks.map((stock) => (
+            {stocks.map((stock) => (
                 <TableRow
                   key={stock._id ?? "N/A"}
                   className={`text-base transition-colors hover:bg-muted/50 ${selectedStockId === stock._id ? "bg-muted/50" : ""}`}
@@ -195,8 +220,13 @@ export default function StockTable({
                                 size="icon"
                                 onClick={() => handleViewStock(stock)}
                                 className={`h-8 w-8 ${selectedStockId === stock._id ? "text-primary" : ""}`}
+                                disabled={loadingStockId === stock._id}
                               >
-                                <Eye className="h-4 w-4" />
+                                {loadingStockId === stock._id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Eye className="h-4 w-4" />
+                                )}
                               </Button>
                             )}
                           </TableCell>
@@ -213,8 +243,8 @@ export default function StockTable({
                         )
                       case "current_price":
                         return (
-                          <TableCell key={column.key} className="font-semibold text-primary">
-                            ${stock.current_price?.toFixed(2) ?? "N/A"}
+                          <TableCell key={column.key} className="font-semibold text-primary text-green-500">
+                            {stock.current_price?.toFixed(2) ?? "N/A"}
                           </TableCell>
                         )
                       case "returns":
@@ -224,19 +254,19 @@ export default function StockTable({
                             <div className="space-y-1">
                               <div className="flex items-center justify-between">
                                 <span className="text-sm">1W:</span>
-                                {stock.returns && typeof stock.returns.oneWeekReturn === 'string' ? 
+                                {stock.returns && typeof stock.returns.oneWeekReturn === 'number' ? 
                                   renderPercentage(stock.returns.oneWeekReturn) : 
                                   <span className="text-muted-foreground">N/A</span>}
                               </div>
                               <div className="flex items-center justify-between">
                                 <span className="text-sm">1M:</span>
-                                {stock.returns && typeof stock.returns.oneMonthReturn === 'string' ? 
+                                {stock.returns && typeof stock.returns.oneMonthReturn === 'number' ? 
                                   renderPercentage(stock.returns.oneMonthReturn) : 
                                   <span className="text-muted-foreground">N/A</span>}
                               </div>
                               <div className="flex items-center justify-between">
                                 <span className="text-sm">3M:</span>
-                                {stock.returns && typeof stock.returns.threeMonthReturn === 'string' ? 
+                                {stock.returns && typeof stock.returns.threeMonthReturn === 'number' ? 
                                   renderPercentage(stock.returns.threeMonthReturn) : 
                                   <span className="text-muted-foreground">N/A</span>}
                               </div>
@@ -246,7 +276,7 @@ export default function StockTable({
                       case "return_since_rec":
                         return (
                           <TableCell key={column.key}>
-                            {typeof stock.returns?.returnSinceAdded === 'string' ? 
+                            {typeof stock.returns?.returnSinceAdded === 'number' ? 
                               renderPercentage(stock.returns?.returnSinceAdded) :
                                
                               <span className="text-muted-foreground">N/A</span>}
@@ -255,7 +285,7 @@ export default function StockTable({
                         case "return_since_added":
                           return (
                             <TableCell key={column.key}>
-                              {typeof stock.returns?.returnSinceAdded === 'string' ? 
+                              {typeof stock.returns?.returnSinceAdded === 'number' ? 
                                 renderPercentage(stock.returns?.returnSinceAdded) :
                                  
                                 <span className="text-muted-foreground">N/A</span>}
@@ -324,7 +354,7 @@ export default function StockTable({
                     }
                   })}
                 </TableRow>
-              ))}
+            ))}
             </TableBody>
           </Table>
         </div>
@@ -344,17 +374,3 @@ export default function StockTable({
     </div>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

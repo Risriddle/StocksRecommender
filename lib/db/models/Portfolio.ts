@@ -18,6 +18,10 @@ const portfolioSchema = new mongoose.Schema({
     type:String,
     default:"no description provided"
   },
+   portfolioReturn:{
+     type:Number,
+     default:0
+   },
   created_at: {
     type: Date,
     default: Date.now,

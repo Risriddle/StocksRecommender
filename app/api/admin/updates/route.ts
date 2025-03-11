@@ -67,11 +67,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, message: `Try again Later!` });
       }
       console.log(`Updating stock: ${stock.name},${update}`);
-    //   await StockIndicator.findOneAndUpdate(
-    //     { stock_id: stock.stockId },
-    //     { last_updated: new Date() },
-    //     { upsert: true }
-    //   );
+ 
     }
 
     return NextResponse.json({ success: true, message: `Updated ${stocksToUpdate.length} stocks` });

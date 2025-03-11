@@ -22,6 +22,10 @@ const portfolioStockSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  returnSinceAdded:{
+    type:Number,
+    default:0
+  }
 })
 
 export const PortfolioStock = mongoose.models?.PortfolioStock || mongoose.model("PortfolioStock", portfolioStockSchema)

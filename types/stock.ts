@@ -43,6 +43,7 @@ export interface Stock  {
   };
   status: string;
   isPresent:boolean;
+  isInPortfolio?: boolean
 };
 
 

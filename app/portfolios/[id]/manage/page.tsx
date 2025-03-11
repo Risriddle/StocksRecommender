@@ -15,20 +15,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
+import type { Stock } from "@/types/stock"
 
-interface Stock {
-  _id: string
-  stock_id: string;
-  name: string
-  company: string
-  currency:string;
-  exchange: string
-  industry: string
-  stockReturn: number
-  current_price: number
-  status: "BUY" | "HOLD" | "SELL" | "MONITOR"
-  isInPortfolio?: boolean
-}
+// interface Stock {
+//   _id: string
+//   stock_id: string;
+//   name: string
+//   company: string
+//   currency:string;
+//   exchange: string
+//   industry: string
+//   stockReturn: number
+//   current_price: number
+//   status: "BUY" | "HOLD" | "SELL" | "MONITOR"
+//   isInPortfolio?: boolean
+// }
 
 interface Portfolio {
   _id: string
@@ -107,7 +108,7 @@ export default function AddStockPage() {
 
   
     const portfolioStockMap = new Map(
-        portfolioStocks.map((s: Stock) => [s.stock_id, s.stockReturn])
+        portfolioStocks.map((s: Stock) => [s.stock_id])
       );
     
 
@@ -118,7 +119,7 @@ export default function AddStockPage() {
       const markedStocks = allStocksData.map((stock: Stock) => ({
         ...stock,
         isInPortfolio: portfolioStockMap.has(stock._id),
-        stockReturn: portfolioStockMap.get(stock._id) || "N/A",
+        // stockReturn: portfolioStockMap.get(stock._id) || "N/A",
       }))
       
       setStocks(markedStocks)
@@ -303,8 +304,8 @@ export default function AddStockPage() {
                         <TableCell className="text-base">{stock.currency}</TableCell>
                         <TableCell className="text-base text-green-500">{stock.current_price.toFixed(2)}</TableCell>
                         <TableCell className="text-base">
-                      <span className={stock.stockReturn >= 0 ? "text-green-500" : "text-red-500"}>
-                        {stock.stockReturn}%
+                      <span className={stock.returns?.returnSinceAdded >= 0 ? "text-green-500" : "text-red-500"}>
+                        {stock.returns?.returnSinceAdded }%
                       </span>
                     </TableCell>
                         <TableCell>

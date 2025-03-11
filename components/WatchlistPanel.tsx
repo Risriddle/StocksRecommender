@@ -1,9 +1,10 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { Plus, Eye, Trash2, Pencil } from "lucide-react"
+import { Plus, Eye, Trash2, Pencil, Loader2 } from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import {
   Dialog,
@@ -40,6 +41,7 @@ interface WatchlistPanelProps {
 export default function WatchlistPanel({ open, onOpenChange, data }: WatchlistPanelProps) {
   const { data: session, status } = useSession()
   const [portfolios, setPortfolios] = useState<Portfolio[]>([])
+  const [loading, setLoading] = useState(false)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [currentPortfolio, setCurrentPortfolio] = useState<Portfolio | null>(null)
@@ -53,13 +55,17 @@ export default function WatchlistPanel({ open, onOpenChange, data }: WatchlistPa
 
   const fetchPortfolios = async () => {
     try {
+      setLoading(true)
       const response = await fetch(`/api/portfolios/users/${userId}`)
       const data = await response.json()
+      console.log(data, "data in watchlist panel")
       if (response.ok) {
         setPortfolios(data)
       }
     } catch (error) {
       console.error("Error fetching portfolios:", error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -67,11 +73,12 @@ export default function WatchlistPanel({ open, onOpenChange, data }: WatchlistPa
     if (status === "authenticated" && userId) {
       fetchPortfolios()
     }
-  }, [status, userId]) // Removed fetchPortfolios from dependencies
+  }, [status, userId]) 
 
   const handleCreatePortfolio = async () => {
     if (!newPortfolio.name.trim()) return
     try {
+      setLoading(true)
       const response = await fetch(`/api/portfolios/users/${userId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -86,11 +93,14 @@ export default function WatchlistPanel({ open, onOpenChange, data }: WatchlistPa
       }
     } catch (error) {
       console.error("Error creating portfolio:", error)
+    } finally {
+      setLoading(false)
     }
   }
-
+  
   const handleDeletePortfolio = async (portfolioId: string) => {
     try {
+      setLoading(true)
       const response = await fetch(`/api/portfolios/${portfolioId}`, {
         method: "DELETE",
       })
@@ -99,12 +109,15 @@ export default function WatchlistPanel({ open, onOpenChange, data }: WatchlistPa
       }
     } catch (error) {
       console.error("Error deleting portfolio:", error)
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleUpdatePortfolio = async () => {
     if (!currentPortfolio?.name.trim()) return
     try {
+      setLoading(true)
       const response = await fetch(`/api/portfolios/${currentPortfolio._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -118,6 +131,8 @@ export default function WatchlistPanel({ open, onOpenChange, data }: WatchlistPa
       }
     } catch (error) {
       console.error("Error updating portfolio:", error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -137,89 +152,101 @@ export default function WatchlistPanel({ open, onOpenChange, data }: WatchlistPa
 
           <ScrollArea className="h-[calc(100vh-5rem)]">
             <div className="p-6 space-y-6">
-              {portfolios.map((portfolio) => (
-                <Card key={portfolio._id} className="group relative">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-xl font-bold">{portfolio.name}</CardTitle>
-                        <CardDescription className="text-base">{portfolio.stockCount} stocks</CardDescription>
-                      </div>
-                      <TooltipProvider>
-                        <div className="flex items-center space-x-1">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => router.push(`/portfolios/${portfolio._id}`)}
-                              >
-                                <Eye className="h-5 w-5" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>View Portfolio</TooltipContent>
-                          </Tooltip>
-
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                  setCurrentPortfolio(portfolio)
-                                  setEditDialogOpen(true)
-                                }}
-                              >
-                                <Pencil className="h-5 w-5" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Edit Portfolio</TooltipContent>
-                          </Tooltip>
-
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button variant="ghost" size="icon" onClick={() => handleDeletePortfolio(portfolio._id)}>
-                                <Trash2 className="h-5 w-5" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Delete Portfolio</TooltipContent>
-                          </Tooltip>
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                  <p className="text-muted-foreground">Loading watchlists...</p>
+                </div>
+              ) : portfolios.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No watchlists found. Create one to get started.</p>
+                </div>
+              ) : (
+                portfolios.map((portfolio) => (
+                  <Card key={portfolio._id} className="group relative">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="text-xl font-bold">{portfolio.name}</CardTitle>
+                          <CardDescription className="text-base">{portfolio.stockCount} stocks</CardDescription>
                         </div>
-                      </TooltipProvider>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="text-base">
-                        Returns:
-                        <span
-                          className={
-                            portfolio.portfolioReturn >= 0
-                              ? "text-green-500 font-semibold"
-                              : "text-red-500 font-semibold"
-                          }
-                        >
-                          {" "}
-                          {portfolio.portfolioReturn}%
-                        </span>
+                        <TooltipProvider>
+                          <div className="flex items-center space-x-1">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => router.push(`/portfolios/${portfolio._id}`)}
+                                >
+                                  <Eye className="h-5 w-5" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>View Portfolio</TooltipContent>
+                            </Tooltip>
+
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => {
+                                    setCurrentPortfolio(portfolio)
+                                    setEditDialogOpen(true)
+                                  }}
+                                >
+                                  <Pencil className="h-5 w-5" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Edit Portfolio</TooltipContent>
+                            </Tooltip>
+
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" onClick={() => handleDeletePortfolio(portfolio._id)}>
+                                  <Trash2 className="h-5 w-5" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Delete Portfolio</TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </TooltipProvider>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            router.push(`/portfolios/${portfolio._id}/manage`)
-                          }}
-                        >
-                          Manage Stocks
-                        </Button>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="text-base">
+                          Returns:
+                          <span
+                            className={
+                              portfolio.portfolioReturn >= 0
+                                ? "text-green-500 font-semibold"
+                                : "text-red-500 font-semibold"
+                            }
+                          >
+                            {" "}
+                            {portfolio.portfolioReturn}%
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              router.push(`/portfolios/${portfolio._id}/manage`)
+                            }}
+                          >
+                            Manage Stocks
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </ScrollArea>
+    
         </SheetContent>
       </Sheet>
 
@@ -268,7 +295,16 @@ export default function WatchlistPanel({ open, onOpenChange, data }: WatchlistPa
             <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCreatePortfolio}>Create</Button>
+            <Button onClick={handleCreatePortfolio} disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create"
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -320,11 +356,19 @@ export default function WatchlistPanel({ open, onOpenChange, data }: WatchlistPa
             <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleUpdatePortfolio}>Save Changes</Button>
+            <Button onClick={handleUpdatePortfolio} disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
   )
 }
-

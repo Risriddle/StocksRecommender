@@ -7,21 +7,50 @@ import { StockPriceHistory } from "@/lib/db/models/StockPriceHistory";
 
 
 
+// export async function GET(req: NextRequest) {
+//   await dbConnect();
+
+//   try {
+    
+//     const stocks = await Stock.find({}); 
+    
+//     return NextResponse.json(stocks, { status: 200 });
+
+//   } catch (error: any) {
+//     console.error("Error fetching stocks:", error);
+//     return NextResponse.json({ error: "Error fetching stocks" }, { status: 500 });
+//   }
+// }
+
+
+import { Returns } from "@/lib/db/models/Returns";
+
 export async function GET(req: NextRequest) {
   await dbConnect();
 
   try {
-    
-    const stocks = await Stock.find({}); // Fetch all stocks
-    
-    return NextResponse.json(stocks, { status: 200 });
+    // Fetch all stocks and populate the associated returns
+    const stocks = await Stock.find({})
+      .lean(); // Converts Mongoose documents to plain JS objects for better performance
+
+    // Fetch returns for each stock and merge data
+    const stockData = await Promise.all(
+      stocks.map(async (stock) => {
+        const stockReturns = await Returns.findOne({ stock_id: stock._id }).lean();
+        return {
+          ...stock,
+          returns: stockReturns || null, // Attach returns if found, otherwise null
+        };
+      })
+    );
+
+    return NextResponse.json(stockData, { status: 200 });
 
   } catch (error: any) {
-    console.error("Error fetching stocks:", error);
-    return NextResponse.json({ error: "Error fetching stocks" }, { status: 500 });
+    console.error("Error fetching stocks with returns:", error);
+    return NextResponse.json({ error: "Error fetching stocks with returns" }, { status: 500 });
   }
 }
-
 
 
 

@@ -28,7 +28,7 @@ interface StockDetailsProps {
 export default function StockDetails({ stock }: StockDetailsProps) {
   if (!stock) return null
 
-
+console.log(stock,"stock in stockdetailssssssssssssssssssssssssssssssssssss")
   const renderValue = (value: any, isPercentage = false, isPriceChange = false) => {
     if (value === undefined || value === null) return "N/A"
 

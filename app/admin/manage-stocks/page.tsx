@@ -717,6 +717,7 @@ type StockIndicator = {
 
 type StockReturns = {
   oneWeekReturn?: number
+  returnSinceAdded?:number
   oneMonthReturn?: number
   threeMonthReturn?: number
   oneYearReturn?: number
@@ -1255,6 +1256,14 @@ export default function ManageStocks() {
                     {selectedStock.returns ? (
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                        
+                       <div className="border rounded-md p-3">
+                          <div className="text-sm text-muted-foreground">Return Since Added</div>
+                          <div
+                            className={`text-lg font-semibold ${getReturnColorClass(selectedStock.returns.returnSinceAdded)}`}
+                          >
+                            {formatPercentage(selectedStock.returns.returnSinceAdded)}
+                          </div>
+                        </div>
 
                         <div className="border rounded-md p-3">
                           <div className="text-sm text-muted-foreground">1 Week</div>
@@ -1501,6 +1510,16 @@ export default function ManageStocks() {
                     {selectedStock.returns ? (
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                        
+                       
+                       <div className="border rounded-md p-3">
+                          <div className="text-sm text-muted-foreground">Return Since Added</div>
+                          <div
+                            className={`text-lg font-semibold ${getReturnColorClass(selectedStock.returns.returnSinceAdded)}`}
+                          >
+                            {formatPercentage(selectedStock.returns.returnSinceAdded)}
+                          </div>
+                        </div>
+
 
                         <div className="border rounded-md p-3">
                           <div className="text-sm text-muted-foreground">1 Week</div>

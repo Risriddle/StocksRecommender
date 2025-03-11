@@ -203,8 +203,9 @@ console.log(scores,recommendation,"in update new stock==========================
       );
 
       // Store new recommendation
-      await Recommendation.create({
-        stock_id: stock._id,
+      await Recommendation.findOneAndUpdate(
+        { stock_id: stock._id },
+        { 
         recommendation: recommendation.rec,
         reason: recommendation.reason,
       });

@@ -25,11 +25,14 @@ interface PortfolioMetrics {
     status: string
     investedAmount: number
     currentValue: number
-    returnSinceAdded: string
-    oneWeekReturn: string | null
-    oneMonthReturn: string | null
-    threeMonthReturn: string | null
-    sixMonthReturn: string | null
+    individualReturn: number
+    stockReturnsData:{
+    returnSinceAdded:number | null
+    oneWeekReturn: number  | null
+    oneMonthReturn: number  | null
+    threeMonthReturn: number  | null
+    sixMonthReturn: number  | null
+    }
   }>
 }
 
@@ -192,8 +195,8 @@ export default function MetricsSection() {
                       </td>
                       <td className="text-right py-3 px-4">${stock.investedAmount.toFixed(2)}</td>
                       <td className="text-right py-3 px-4">${stock.currentValue.toFixed(2)}</td>
-                      <td className={`text-right py-3 px-4 ${parseFloat(stock.returnSinceAdded) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                        {stock.returnSinceAdded}
+                      <td className={`text-right py-3 px-4 ${stock.stockReturnsData.returnSinceAdded} >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                        {stock.stockReturnsData.returnSinceAdded}
                       </td>
                     </tr>
                   ))}

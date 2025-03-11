@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const stockId = searchParams.get("stock_id"); // Get stock_id from query params
-
+    console.log(stockId,"stokc id in stock-indicator api------------------------------------------------")
     if (!stockId) {
       return NextResponse.json({ success: false, error: "stock_id is required" }, { status: 400 });
     }
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
       .sort({ date_recommended: -1 })
       .lean();
     const returns = await calculateStockReturns(stockId);
-
+     console.log(returns,"in indicator apiiiiiiiiiiiiiii")
     // Return the stock with its details
     return NextResponse.json({
       success: true,

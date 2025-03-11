@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import {PortfolioStock} from "@/lib/db/models/PortfolioStock";
 import {Stock} from "@/lib/db/models/Stock";
-
-
+import {Portfolio} from "@/lib/db/models/Portfolio";
+import {Returns} from "@/lib/db/models/Returns";
 
 
 export async function GET(req: NextRequest,context: { params?: { portfolioId?: string } }) {
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest,context: { params?: { portfolioId?: s
 
         // Fetch stock details from Stock collection
         const stocks = await Stock.find({ _id: { $in: stockIds } });
-
+        
         console.log(stocks, "stocks fetched from portfolioId");
 
         return NextResponse.json(stocks, { status: 200 });
@@ -37,32 +37,93 @@ export async function GET(req: NextRequest,context: { params?: { portfolioId?: s
     }
 }
 
-// Adding stocks to portfolio
-export async function POST(req: NextRequest ,context: { params?: { portfolioId?: string } } ) {
+
+// // Adding stocks to portfolio
+// export async function POST(req: NextRequest ,context: { params?: { portfolioId?: string } } ) {
+//     try {
+//         await dbConnect();
+//         const portfolioId  = context.params?.portfolioId;
+//   console.log("Portfolio ID:", portfolioId);
+
+//         const { name, price ,stockId} = await req.json();
+//         console.log(stockId,"stock id in add stockkkkkkkkkkkkkkkkkkk")
+//         if (!name || !price) {
+//             return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
+//         }
+
+//         // const { portfolioId } = await Promise.resolve(context.params); // Ensuring params are awaited
+//         console.log(portfolioId,"portfolioid in add stockkkkkkkkkkkkk")
+//         // const addStock=new Stock({name,current_price:price,category,status,exchange,industry})
+        
+//         const newStock = new PortfolioStock({ portfolio_id:portfolioId,stock_id: stockId,name:name,added_price: price, added_date: new Date() });
+//         await newStock.save();
+
+//         return NextResponse.json({ success: true, stock: newStock }, { status: 201 });
+//     } catch (error) {
+//         console.error("Error adding stock ❌", error);
+//         return NextResponse.json({ message: "Failed to add stock" }, { status: 500 });
+//     }
+// }
+
+
+
+
+export async function POST(req: NextRequest, context: { params?: { portfolioId?: string } }) {
     try {
         await dbConnect();
-        const portfolioId  = context.params?.portfolioId;
-  console.log("Portfolio ID:", portfolioId);
+        const portfolioId = context.params?.portfolioId;
+        console.log("Portfolio ID:", portfolioId);
 
-        const { name, price ,stockId} = await req.json();
-        console.log(stockId,"stock id in add stockkkkkkkkkkkkkkkkkkk")
+        const { name, price, stockId } = await req.json();
+        console.log(stockId, "stock id in add stock");
+
         if (!name || !price) {
             return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
         }
+ // Fetch stock return from Returns collection
+ const stockReturnData = await Returns.findOne({ stock_id: stockId });
+ if (!stockReturnData) {
+     return NextResponse.json({ message: "Stock return data not found" }, { status: 404 });
+ }
+ const stockReturn = stockReturnData.returnSinceAdded; // Assuming "return" field exists
 
-        // const { portfolioId } = await Promise.resolve(context.params); // Ensuring params are awaited
-        console.log(portfolioId,"portfolioid in add stockkkkkkkkkkkkk")
-        // const addStock=new Stock({name,current_price:price,category,status,exchange,industry})
-        
-        const newStock = new PortfolioStock({ portfolio_id:portfolioId,stock_id: stockId,name:name,added_price: price, added_date: new Date() });
+        // Create a new stock entry
+        const newStock = new PortfolioStock({
+            portfolio_id: portfolioId,
+            stock_id: stockId,
+            name: name,
+            added_price: price,
+            added_date: new Date(),
+            returnSinceAdded:stockReturn
+        });
         await newStock.save();
 
-        return NextResponse.json({ success: true, stock: newStock }, { status: 201 });
+       
+        // Fetch the current portfolio data
+        const portfolio = await Portfolio.findById(portfolioId);
+        if (!portfolio) {
+            return NextResponse.json({ message: "Portfolio not found" }, { status: 404 });
+        }
+
+        // Update portfolio return (adjust logic as needed)
+        let updatedPortfolioReturn;
+        if (portfolio.portfolioReturn) {
+            updatedPortfolioReturn = (portfolio.portfolioReturn + stockReturn) / 2; // Example: Taking average
+        } else {
+            updatedPortfolioReturn = stockReturn;
+        }
+
+        // Update portfolio with the new return
+        await Portfolio.findByIdAndUpdate(portfolioId, { portfolioReturn: updatedPortfolioReturn });
+
+        return NextResponse.json({ success: true, stock: newStock, updatedPortfolioReturn }, { status: 201 });
+
     } catch (error) {
         console.error("Error adding stock ❌", error);
         return NextResponse.json({ message: "Failed to add stock" }, { status: 500 });
     }
 }
+
 
 
 import mongoose from "mongoose";

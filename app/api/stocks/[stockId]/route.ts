@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
-import calculateStockReturns from "@/lib/calculateReturns";
+// import calculateStockReturns from "@/lib/calculateReturns";
 
 import { Stock } from '@/lib/db/models/Stock';
+import { Returns } from '@/lib/db/models/Returns';
 import { StockIndicator } from '@/lib/db/models/StockIndicator';
 import { Recommendation } from '@/lib/db/models/Recommendation';
 
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest, context: { params?: { stockId?: stri
             return NextResponse.json({ message: "Stock ID is required" }, { status: 400 });
         }
 
-        const returns = await calculateStockReturns(stockId);
+        const returns = await Returns.findOne({stock_id:stockId})
         console.log(returns,"returns in api/stock/stockId--------------------------------------------------")
         if (!returns) {
             return NextResponse.json({ message: "Returns data not found" }, { status: 404 });
@@ -50,7 +51,9 @@ export async function DELETE(req: NextRequest, context: { params?: { stockId?: s
       
         await StockIndicator.deleteMany({stock_id:stockId});
         await Recommendation.deleteMany({stock_id:stockId});
+        await Returns.findByIdAndDelete(stockId);
         await Stock.findByIdAndDelete(stockId);
+        
        
        
 
