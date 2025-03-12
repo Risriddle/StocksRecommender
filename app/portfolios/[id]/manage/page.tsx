@@ -17,19 +17,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { Stock } from "@/types/stock"
 
-// interface Stock {
-//   _id: string
-//   stock_id: string;
-//   name: string
-//   company: string
-//   currency:string;
-//   exchange: string
-//   industry: string
-//   stockReturn: number
-//   current_price: number
-//   status: "BUY" | "HOLD" | "SELL" | "MONITOR"
-//   isInPortfolio?: boolean
-// }
 
 interface Portfolio {
   _id: string

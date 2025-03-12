@@ -18,6 +18,7 @@ interface FilterSectionProps {
     industry: string;
     country: string;
     time: string;
+    rating: string;
   };
   setFilters: (filters: any) => void;
   uniqueValues: {
@@ -39,6 +40,20 @@ export default function FilterSection({
 }: FilterSectionProps) {
   const [isColumnsOpen, setIsColumnsOpen] = useState(false);
   const [columns, setColumns] = useState<Record<string, boolean>>({});
+
+  const universalIndustries = [
+    "Technology",
+    "Healthcare",
+    "Finance",
+    "Consumer Goods",
+    "Energy",
+    "Industrials",
+    "Materials",
+    "Real Estate",
+    "Utilities",
+    "Communication Services"
+  ];
+  
 
   // Define all possible columns
   const columnGroups = [
@@ -62,6 +77,14 @@ export default function FilterSection({
     { key: "date_recommended", label: "Recommended Date" },
     { key: "category", label: "Category" },
     { key: "action", label: "Action" },
+
+   
+      { key: "oneMonthReturn", label: "1M Return" },
+      { key: "threeMonthReturn", label: "3M Return" },
+      { key: "sixMonthReturn", label: "6M Return" },
+      { key: "oneYearReturn", label: "1Y Return" },
+      { key: "rating", label: "Rating" },
+   
   ];
 
   // Initialize visible columns with only essential ones checked
@@ -115,6 +138,25 @@ export default function FilterSection({
             </SelectContent>
           </Select>
 
+
+        
+<Select
+  value={filters.rating || "all"}
+  onValueChange={(value) => setFilters({ ...filters, rating: value === "all" ? "" : value })}
+>
+  <SelectTrigger className="w-[140px]">
+    <SelectValue placeholder="Rating" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="all">All Ratings</SelectItem>
+    <SelectItem value="BUY">Buy</SelectItem>
+    <SelectItem value="HOLD">Hold</SelectItem>
+    <SelectItem value="SELL">Sell</SelectItem>
+    <SelectItem value="TARGET">Target</SelectItem>
+    <SelectItem value="MONITOR">Monitor</SelectItem>
+  </SelectContent>
+</Select>
+
           <Select
             value={filters.country || "all"}
             onValueChange={(value) => setFilters({ ...filters, country: value === "all" ? "" : value })}
@@ -148,6 +190,8 @@ export default function FilterSection({
               ))}
             </SelectContent>
           </Select>
+
+
 
           <Select
             value={filters.category || "all"}
@@ -240,3 +284,7 @@ export default function FilterSection({
     </div>
   );
 }
+
+
+
+

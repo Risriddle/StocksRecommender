@@ -160,6 +160,74 @@ const determineRecommendation = (scores: StockScores): StockRecommendation => {
   };
 };
 
+// export async function updateNewStock(stockId: string): Promise<boolean> {
+//   try {
+//     await dbConnect();
+
+//     const stock = await Stock.findById(stockId);
+//     if (!stock) {
+//       console.error(`Stock with ID ${stockId} not found`);
+//       return false;
+//     }
+
+//     let stockData: StockAPIResponse;
+//     try {
+//       const response = await axios.get<StockAPIResponse>(`${API_BASE_URL}?stock=${stock.name}`,{timeout:30000});
+//       console.log("FULL API RESPONSE:", JSON.stringify(response.data));
+//       stockData = response.data;
+//       console.log(stockData,"=================================stockData")
+//       if (!stockData || typeof stockData !== 'object') {
+//         throw new Error('Invalid API response format');
+//       }
+//     } catch (apiError) {
+//       console.error(`API request failed for ${stock.name}:`, apiError);
+//       return false;
+//     }
+
+//     const scores = calculateScore(stockData);
+//     const recommendation = determineRecommendation(scores);
+// console.log(scores,recommendation,"in update new stock==============================================")
+//     try {
+//       // Update or insert StockIndicator
+//       await StockIndicator.findOneAndUpdate(
+//         { stock_id: stock._id },
+//         { 
+//           ...scores, 
+//           market_cap:stockData["Market Cap"],
+//           volume:stockData["Average Volume"],
+//           pe_ratio:stockData["P/E (TTM)"],
+//           last_updated: new Date(), 
+//           recommendation: recommendation.rec 
+//         },
+//         { upsert: true, new: true }
+//       );
+
+//       // Store new recommendation
+//       await Recommendation.findOneAndUpdate(
+//         { stock_id: stock._id },
+//         { 
+//         recommendation: recommendation.rec,
+//         reason: recommendation.reason,
+//       });
+
+       
+
+//       // Update stock status
+//       await Stock.findByIdAndUpdate(stock._id, { status: recommendation.rec });
+
+//       console.log(`Successfully updated ${stock.name} -> ${recommendation.rec}`);
+//       return true;
+//     } catch (dbError) {
+//       console.error(`Database operation failed for ${stock.name}:`, dbError);
+//       return false;
+//     }
+//   } catch (error) {
+//     console.error("Error in updateNewStock:", error);
+//     return false;
+//   }
+// }
+
+
 export async function updateNewStock(stockId: string): Promise<boolean> {
   try {
     await dbConnect();
@@ -172,10 +240,9 @@ export async function updateNewStock(stockId: string): Promise<boolean> {
 
     let stockData: StockAPIResponse;
     try {
-      const response = await axios.get<StockAPIResponse>(`${API_BASE_URL}?stock=${stock.name}`,{timeout:30000});
+      const response = await axios.get<StockAPIResponse>(`${API_BASE_URL}?stock=${stock.name}`, { timeout: 30000 });
       console.log("FULL API RESPONSE:", JSON.stringify(response.data));
       stockData = response.data;
-      console.log(stockData,"=================================stockData")
       if (!stockData || typeof stockData !== 'object') {
         throw new Error('Invalid API response format');
       }
@@ -186,16 +253,17 @@ export async function updateNewStock(stockId: string): Promise<boolean> {
 
     const scores = calculateScore(stockData);
     const recommendation = determineRecommendation(scores);
-console.log(scores,recommendation,"in update new stock==============================================")
+    console.log(scores, recommendation, "in update new stock");
+
     try {
       // Update or insert StockIndicator
       await StockIndicator.findOneAndUpdate(
         { stock_id: stock._id },
         { 
           ...scores, 
-          market_cap:stockData["Market Cap"],
-          volume:stockData["Average Volume"],
-          pe_ratio:stockData["P/E (TTM)"],
+          market_cap: stockData["Market Cap"],
+          volume: stockData["Average Volume"],
+          pe_ratio: stockData["P/E (TTM)"],
           last_updated: new Date(), 
           recommendation: recommendation.rec 
         },
@@ -203,14 +271,25 @@ console.log(scores,recommendation,"in update new stock==========================
       );
 
       // Store new recommendation
-      await Recommendation.findOneAndUpdate(
-        { stock_id: stock._id },
-        { 
+      await Recommendation.create({
+        stock_id: stock._id,
         recommendation: recommendation.rec,
         reason: recommendation.reason,
+        createdAt: new Date(),
       });
 
-       
+      // Keep only the last 4 weeks of recommendations
+      const fourWeeksAgo = new Date();
+      fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
+
+      const recCount = await Recommendation.countDocuments({ stock_id: stock._id });
+
+      if (recCount > 4) {
+        await Recommendation.deleteMany({
+          stock_id: stock._id,
+          createdAt: { $lt: fourWeeksAgo },
+        });
+      }
 
       // Update stock status
       await Stock.findByIdAndUpdate(stock._id, { status: recommendation.rec });

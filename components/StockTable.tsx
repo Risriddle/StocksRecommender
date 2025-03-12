@@ -1,5 +1,4 @@
 
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -156,11 +155,12 @@ export default function StockTable({
     exchange: { label: "Exchange", key: "exchange" ,alwaysVisible: true},
     currency: { label: "Currency", key: "currency",alwaysVisible: true },
     returnSinceRec: { label: "Return Since Rec.", key: "return_since_rec", alwaysVisible: true },
-    status: { label: "Status", key: "status", alwaysVisible: true },
+    addedDate: { label: "Date Added", key: "added_date",alwaysVisible: true },
+    status: { label: "Rating", key: "status", alwaysVisible: true },
     returns: { label: "Returns", key: "returns", alwaysVisible: true },
+   
     // Additional column groups that are hidden by default
        country: { label: "Country", key: "country" ,alwaysVisible: false},
-    addedDate: { label: "Date Added", key: "added_date",alwaysVisible: false },
     returnSinceAdded: { label: "Return Since Added", key: "return_since_added" ,alwaysVisible: false},
     returnSinceBuy: { label: "Return Since Buy", key: "return_since_buy" ,alwaysVisible: false},
     realizedReturn: { label: "Realized Return", key: "realized_return",alwaysVisible: false },

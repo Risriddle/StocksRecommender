@@ -1,7 +1,4 @@
 
-
-
-
 export interface Stock  {
   _id: string;
   name: string;
@@ -43,7 +40,18 @@ export interface Stock  {
   };
   status: string;
   isPresent:boolean;
-  isInPortfolio?: boolean
+  isInPortfolio?: boolean;
+
+  last_4_weeks_recommendations?: {
+    date_recommended: string
+    recommendation: string
+    reason: string
+  }[]
+  latestrecommendation?: {
+    date_recommended: string
+    recommendation: string
+    reason: string
+  }
 };
 
 

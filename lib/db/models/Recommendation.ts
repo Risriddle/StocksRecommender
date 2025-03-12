@@ -21,6 +21,6 @@ const recommendationSchema = new mongoose.Schema({
   },
 })
 
-
+recommendationSchema.index({ stock_id: 1, date_recommended: -1 });
 
 export const Recommendation = mongoose.models?.Recommendation || mongoose.model("Recommendation", recommendationSchema)

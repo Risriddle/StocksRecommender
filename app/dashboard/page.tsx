@@ -80,6 +80,8 @@ export default function DashboardPage() {
     industry: "",
     country: "",
     time: "",
+    rating:"",
+   
   })
   const [loading, setLoading] = useState(false)
   const [isMetricsOpen, setIsMetricsOpen] = useState(false)
@@ -127,7 +129,10 @@ export default function DashboardPage() {
     fetchStocks()
   }, [isLoaded, userId, setStocks, setFilteredStocks])
 
-
+  
+  
+  
+  
   // Apply filters
   useEffect(() => {
     const applyFilters = () => {
@@ -137,13 +142,14 @@ export default function DashboardPage() {
         const matchCategory = filters.category ? stock.category === filters.category : true
         const matchIndustry = filters.industry ? stock.industry === filters.industry : true
         const matchCountry = filters.country ? stock.country === filters.country : true
+        const matchRating = filters.rating ? stock.status === filters.rating : true
 
         const stockDate = new Date(stock.added_date)
         const timeFilter = getTimeRange(filters.time)
         const matchTime = timeFilter ? stockDate >= timeFilter : true
 
         return matchCompany && matchExchange && matchCategory && 
-               matchIndustry && matchCountry && matchTime
+               matchIndustry && matchCountry && matchTime && matchRating
       })
 
       setFilteredStocks(filtered)
@@ -164,6 +170,7 @@ export default function DashboardPage() {
       categories: Array.from(new Set(stocks.map((stock) => stock.category))),
       industries: Array.from(new Set(stocks.map((stock) => stock.industry))),
       countries: Array.from(new Set(stocks.map((stock) => stock.country))),
+      rating: Array.from(new Set(stocks.map((stock) => stock.status))),
     }),
     [stocks]
   )
@@ -293,3 +300,9 @@ export default function DashboardPage() {
     </SidebarProvider>
   )
 }
+
+
+
+
+
+
