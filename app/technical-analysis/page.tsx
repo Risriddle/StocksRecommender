@@ -628,7 +628,7 @@ export default function TechnicalAnalysisPage() {
                                 {selectedStock.stockIndicators.volume_analysis
                                   .volume_change_percent > 0
                                   ? "+"
-                                  : ""}
+                                  : "n/a"}
                                 {
                                   selectedStock.stockIndicators.volume_analysis
                                     .volume_change_percent
@@ -768,14 +768,14 @@ export default function TechnicalAnalysisPage() {
                                   upside potential of&quot;
                                   {selectedStock.stockIndicators.upside}%
                                 </span>
-                                . Current pattern: "
+                                . Current pattern: &quot;
                                 <span className="italic font-semibold">
                                   {
                                     selectedStock.stockIndicators
                                       .volume_analysis.chart_pattern
                                   }
                                 </span>
-                                ".
+                                &quot;.
                                 {selectedStock.stockIndicators.rsi_indicators
                                   .rsi_14 > 70 &&
                                   " RSI indicates overbought conditions, suggesting caution."}
