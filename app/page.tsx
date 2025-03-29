@@ -223,7 +223,7 @@ export default function Home() {
                   size="lg"
                   className="border-white text-white hover:bg-white/10 font-medium"
                 >
-                  Explore Featured Stocks&quot;
+                  Explore Featured Stocks
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
