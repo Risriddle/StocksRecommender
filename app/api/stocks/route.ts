@@ -5,24 +5,6 @@ import axios from "axios";
 import { StockPriceHistory } from "@/lib/db/models/StockPriceHistory";
 
 
-
-
-// export async function GET(req: NextRequest) {
-//   await dbConnect();
-
-//   try {
-    
-//     const stocks = await Stock.find({}); 
-    
-//     return NextResponse.json(stocks, { status: 200 });
-
-//   } catch (error: any) {
-//     console.error("Error fetching stocks:", error);
-//     return NextResponse.json({ error: "Error fetching stocks" }, { status: 500 });
-//   }
-// }
-
-
 import { Returns } from "@/lib/db/models/Returns";
 
 export async function GET(req: NextRequest) {

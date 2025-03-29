@@ -16,10 +16,11 @@ import {
   Activity,
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar,ReferenceLine ,Area } from "recharts"
 import type { Stock } from "@/types/stock"
 
 interface StockDetailsProps {
@@ -339,6 +340,129 @@ export default function StockDetails({ stock }: StockDetailsProps) {
               </div>
             </div>
 
+   {/* Technical Analysis Grid */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+  {/* Technical Signals Card */}
+  <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+    <div className="bg-blue-50 border-b p-3 flex items-center">
+      <Activity className="h-4 w-4 mr-2 text-blue-500" />
+      <h4 className="text-sm font-semibold text-blue-800">Technical Signals</h4>
+    </div>
+    <div className="p-3 space-y-3 text-black text-base">
+      {[
+        { 
+          label: "Overall", 
+          value: stock.indicators?.technical_signals?.overall,
+          icon: <TrendingUp className="h-4 w-4 mr-2" />
+        },
+        { 
+          label: "Short Term", 
+          value: stock.indicators?.technical_signals?.short_term,
+          icon: <ArrowUp className="h-4 w-4 mr-2" />
+        },
+        { 
+          label: "Medium Term", 
+          value: stock.indicators?.technical_signals?.medium_term,
+          icon: <Activity className="h-4 w-4 mr-2" />
+        },
+        { 
+          label: "Long Term", 
+          value: stock.indicators?.technical_signals?.long_term,
+          icon: <TrendingUp className="h-4 w-4 mr-2" />
+        }
+      ].map((signal, index) => (
+        <div 
+          key={index} 
+          className="flex items-center justify-between border-b pb-2 last:border-b-0"
+        >
+          <div className="flex items-center">
+            {signal.icon}
+            <span className="text-xs font-medium text-gray-700">{signal.label}</span>
+          </div>
+          <Badge 
+            variant={
+              signal.value === "Bullish" 
+                ? "default" 
+                : signal.value === "Bearish" 
+                  ? "destructive" 
+                  : "secondary"
+            }
+            className="text-[10px] uppercase"
+          >
+            {signal.value || "N/A"}
+          </Badge>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  {/* Support & Resistance Levels Card */}
+  <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+    <div className="bg-green-50 border-b p-3 flex items-center">
+      <Layers className="h-4 w-4 mr-2 text-green-500" />
+      <h4 className="text-sm font-semibold text-green-800">Support & Resistance</h4>
+    </div>
+    <div className="grid grid-cols-2 divide-x">
+      <div className="p-3">
+        <div className="text-xs text-black uppercase font-semibold text-muted-foreground mb-2">
+          Support Levels
+        </div>
+        {stock.indicators?.support_levels && stock.indicators.support_levels.length > 0 ? (
+          <div className="space-y-1">
+            {stock.indicators.support_levels.map((level, index) => (
+              <div 
+                key={index} 
+                className="flex items-center bg-green-50 rounded px-2 py-1"
+              >
+                <ArrowUp className="h-3 w-3 mr-1 text-green-600" />
+                <span className="text-xs text-green-700 font-medium">
+                  ${level.toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-xs text-muted-foreground italic">No support levels</div>
+        )}
+      </div>
+      <div className="p-3">
+        <div className="text-xs text-black  uppercase font-semibold text-muted-foreground mb-2">
+          Resistance Levels
+        </div>
+        {stock.indicators?.resistance_levels && stock.indicators.resistance_levels.length > 0 ? (
+          <div className="space-y-1">
+            {stock.indicators.resistance_levels.map((level, index) => (
+              <div 
+                key={index} 
+                className="flex items-center bg-red-50 rounded px-2 py-1"
+              >
+                <ArrowDown className="h-3 w-3 mr-1 text-red-600" />
+                <span className="text-xs text-red-700 font-medium">
+                  ${level.toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-xs text-muted-foreground italic">No resistance levels</div>
+        )}
+      </div>
+    </div>
+  </div>
+</div>
+
+{/* Last Updated Information */}
+<div className="mt-4 text-center">
+  <div className="inline-flex items-center text-xs text-muted-foreground bg-gray-50 rounded-full px-3 py-1 border">
+    <Clock className="h-3 w-3 mr-2 text-black" />
+    <span>
+      Last Updated: {stock.indicators?.last_updated 
+        ? new Date(stock.indicators.last_updated).toLocaleString() 
+        : "N/A"}
+    </span>
+  </div>
+</div>
+
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={historicalPriceData}>
@@ -485,85 +609,7 @@ export default function StockDetails({ stock }: StockDetailsProps) {
     </div>
   </div>
 </TabsContent>
-          {/* <TabsContent value="performance" className="px-4 py-3">
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold flex items-center">
-                <BarChart3 className="h-4 w-4 mr-2 text-blue-500" />
-                Key Returns
-              </h3>
-              <div className="space-y-3">
-                {[
-                  { label: "Return Since Added", value: stock.returns?.returnSinceAdded },
-                  { label: "1 Week Return", value: stock.returns?.oneWeekReturn },
-                  { label: "1 Month Return", value: stock.returns?.oneMonthReturn },
-                  { label: "3 Month Return", value: stock.returns?.threeMonthReturn },
-                  { label: "YTD Return", value: stock.returns?.ytdReturn },
-                  { label: "1 Year Return", value: stock.returns?.oneYearReturn },
-                ].map((item, idx) => (
-                  <div key={idx} className="relative p-2 rounded-lg border">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-xs font-medium">{item.label}</span>
-                      <span className="text-xs font-semibold">{renderValue(item.value, true)}</span>
-                    </div>
-                    <Progress
-                      value={item.value ? Math.min(Math.max(item.value + 50, 0), 100) : 50}
-                      className={`h-2 ${(item.value || 0) >= 0 ? "bg-green-500" : "bg-red-500"}`}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              <div className="p-3 rounded-lg border shadow-sm">
-                <div className="mb-3">
-                  <h4 className="text-xs font-semibold mb-1">Total Return</h4>
-                  <div className="flex items-center justify-between">
-                    <div
-                      className={`text-xl font-bold ${
-                        (stock.returns?.returnSinceAdded || 0) >= 0 ? "text-green-500" : "text-red-500"
-                      }`}
-                    >
-                      {(stock.returns?.returnSinceAdded || 0) >= 0 ? "+" : ""}
-                      {stock.returns?.returnSinceAdded || 0}%
-                    </div>
-                    <Badge variant={(stock.returns?.returnSinceAdded || 0) >= 0 ? "default" : "destructive"}>
-                      {(stock.returns?.returnSinceAdded || 0) >= 0 ? "Profitable" : "Loss"}
-                    </Badge>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div>
-                    <div className="uppercase font-semibold text-muted-foreground">Best Period</div>
-                    <div className="font-medium text-green-600">
-                      {Object.entries(stock.returns || {})
-                        .filter(([key]) => key !== "returnSinceAdded")
-                        .reduce(
-                          (best, [key, value]) => (!best[1] || (value && value > best[1]) ? [key, value] : best),
-                          ["", null],
-                        )[0]
-                        .replace(/([A-Z])/g, " $1")
-                        .replace(/^./, (str) => str.toUpperCase())
-                        .replace("Return", "")}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="uppercase font-semibold text-muted-foreground">Worst Period</div>
-                    <div className="font-medium text-red-600">
-                      {Object.entries(stock.returns || {})
-                        .filter(([key]) => key !== "returnSinceAdded")
-                        .reduce(
-                          (worst, [key, value]) => (!worst[1] || (value && value < worst[1]) ? [key, value] : worst),
-                          ["", null],
-                        )[0]
-                        .replace(/([A-Z])/g, " $1")
-                        .replace(/^./, (str) => str.toUpperCase())
-                        .replace("Return", "")}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </TabsContent> */}
+         
 
           {/* Analysis Tab */}
           <TabsContent value="analysis" className="px-4 py-3">
@@ -887,6 +933,8 @@ export default function StockDetails({ stock }: StockDetailsProps) {
               </div>
             </TabsContent>
 
+
+
             {/* Recommendation Tab */}
             <TabsContent value="recommendation" className="px-4 py-3">
               <div className="space-y-3">
@@ -953,143 +1001,148 @@ export default function StockDetails({ stock }: StockDetailsProps) {
                   </div>
                 </div>
               </div>
-              {/* Recommendation History Timeline */}
-              <div className="mt-4">
-                <h4 className="text-sm font-semibold mb-3">Recommendation History</h4>
+              
+              
 
-                {recommendationHistory.length > 0 ? (
-                  <div className="relative">
-                    {/* Timeline line */}
-                    <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-gray-200"></div>
 
-                    {/* Timeline items */}
-                    <div className="space-y-4">
-                      {recommendationHistory.map((rec, index) => (
-                        <div key={index} className="relative pl-10">
-                          {/* Timeline dot */}
-                          <div
-                            className={`absolute left-0 top-1 h-6 w-6 rounded-full flex items-center justify-center
-                            ${
-                              rec.recommendation === "BUY"
-                                ? "bg-green-100 text-green-600"
-                                : rec.recommendation === "SELL"
-                                  ? "bg-red-100 text-red-600"
-                                  : "bg-yellow-100 text-yellow-600"
-                            }`}
-                          >
-                            {rec.recommendation === "BUY" ? (
-                              <TrendingUp className="h-3 w-3" />
-                            ) : rec.recommendation === "SELL" ? (
-                              <TrendingDown className="h-3 w-3" />
-                            ) : (
-                              <Activity className="h-3 w-3" />
-                            )}
-                          </div>
+<div className="mt-4">
+  <h4 className="text-sm font-semibold mb-3">Recommendation History</h4>
 
-                          {/* Content */}
-                          <div className="rounded-lg border p-3 shadow-sm">
-                            <div className="flex justify-between items-start mb-1">
-                              <Badge
-                                variant={
-                                  rec.recommendation === "BUY"
-                                    ? "default"
-                                    : rec.recommendation === "SELL"
-                                      ? "destructive"
-                                      : "secondary"
-                                }
-                              >
-                                {rec.recommendation}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">{rec.date.toLocaleDateString()}</span>
-                            </div>
-                            <p className="text-xs">{rec.reason}</p>
+  {recommendationHistory.length > 0 ? (
+    <div className="relative">
+      {/* Timeline line */}
+      <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-gray-200"></div>
 
-                            {/* Direction arrow if not the first item */}
-                            {index > 0 && recommendationHistory[index - 1].recommendation !== rec.recommendation && (
-                              <div className="absolute left-3 top-3 -translate-x-1/2">
-                                {recommendationHistory[index - 1].recommendation === "BUY" &&
-                                  rec.recommendation === "HOLD" && (
-                                    <ArrowDown className="h-3 w-3 text-yellow-500 rotate-45" />
-                                  )}
-                                {recommendationHistory[index - 1].recommendation === "BUY" &&
-                                  rec.recommendation === "SELL" && <ArrowDown className="h-3 w-3 text-red-500" />}
-                                {recommendationHistory[index - 1].recommendation === "HOLD" &&
-                                  rec.recommendation === "BUY" && (
-                                    <ArrowUp className="h-3 w-3 text-green-500 rotate-45" />
-                                  )}
-                                {recommendationHistory[index - 1].recommendation === "HOLD" &&
-                                  rec.recommendation === "SELL" && (
-                                    <ArrowDown className="h-3 w-3 text-red-500 rotate-45" />
-                                  )}
-                                {recommendationHistory[index - 1].recommendation === "SELL" &&
-                                  rec.recommendation === "BUY" && <ArrowUp className="h-3 w-3 text-green-500" />}
-                                {recommendationHistory[index - 1].recommendation === "SELL" &&
-                                  rec.recommendation === "HOLD" && (
-                                    <ArrowUp className="h-3 w-3 text-yellow-500 rotate-45" />
-                                  )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center p-4 border rounded-lg text-muted-foreground">
-                    No recommendation history available
-                  </div>
-                )}
+      {/* Timeline items */}
+      <div className="space-y-4">
+        {recommendationHistory.map((rec, index) => (
+          <div key={`rec-history-${index}`} className="relative pl-10">
+            {/* Timeline dot */}
+            <div
+              className={`absolute left-0 top-1 h-6 w-6 rounded-full flex items-center justify-center
+              ${
+                rec.recommendation === "BUY"
+                  ? "bg-green-100 text-green-600"
+                  : rec.recommendation === "SELL"
+                    ? "bg-red-100 text-red-600"
+                    : "bg-yellow-100 text-yellow-600"
+              }`}
+            >
+              {rec.recommendation === "BUY" ? (
+                <TrendingUp className="h-3 w-3" />
+              ) : rec.recommendation === "SELL" ? (
+                <TrendingDown className="h-3 w-3" />
+              ) : (
+                <Activity className="h-3 w-3" />
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="rounded-lg border p-3 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <div className="flex justify-between items-start mb-1">
+                <Badge
+                  variant={
+                    rec.recommendation === "BUY"
+                      ? "default"
+                      : rec.recommendation === "SELL"
+                        ? "destructive"
+                        : "secondary"
+                  }
+                >
+                  {rec.recommendation}
+                </Badge>
+                <span className="text-xs text-muted-foreground">{rec.date.toLocaleDateString()}</span>
               </div>
+              <p className="text-xs">{rec.reason}</p>
 
-              {/* Recommendation Movement Chart */}
-              {recommendationHistory.length > 1 && (
-                <div className="mt-4">
-                  <h4 className="text-sm font-semibold mb-3">Recommendation Movement</h4>
-                  <div className="h-48 border rounded-lg p-3">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart
-                        data={recommendationHistory.map((rec, index) => ({
-                          date: rec.date.toLocaleDateString(),
-                          value: rec.recommendation === "BUY" ? 3 : rec.recommendation === "HOLD" ? 2 : 1,
-                          recommendation: rec.recommendation,
-                        }))}
-                        margin={{ top: 5, right: 20, bottom: 20, left: 0 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
-                        <YAxis
-                          domain={[0, 4]}
-                          ticks={[1, 2, 3]}
-                          tickFormatter={(value) => (value === 1 ? "SELL" : value === 2 ? "HOLD" : "BUY")}
-                        />
-                        <Tooltip
-                          formatter={(value, name) => [
-                            value === 1 ? "SELL" : value === 2 ? "HOLD" : "BUY",
-                            "Recommendation",
-                          ]}
-                        />
-                        <Line
-                          type="stepAfter"
-                          dataKey="value"
-                          stroke="#8884d8"
-                          activeDot={{ r: 8 }}
-                          dot={(props) => {
-                            const { cx, cy, payload } = props
-                            const color =
-                              payload.recommendation === "BUY"
-                                ? "#10b981"
-                                : payload.recommendation === "HOLD"
-                                  ? "#f59e0b"
-                                  : "#ef4444"
-
-                            return <circle cx={cx} cy={cy} r={6} fill={color} stroke="none" />
-                          }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
+              {/* Direction arrow if not the first item */}
+              {index > 0 && recommendationHistory[index - 1].recommendation !== rec.recommendation && (
+                <div className="absolute left-3 top-3 -translate-x-1/2">
+                  {recommendationHistory[index - 1].recommendation === "BUY" &&
+                    rec.recommendation === "HOLD" && (
+                      <ArrowDown className="h-3 w-3 text-yellow-500 rotate-45" />
+                    )}
+                  {recommendationHistory[index - 1].recommendation === "BUY" &&
+                    rec.recommendation === "SELL" && <ArrowDown className="h-3 w-3 text-red-500" />}
+                  {recommendationHistory[index - 1].recommendation === "HOLD" &&
+                    rec.recommendation === "BUY" && (
+                      <ArrowUp className="h-3 w-3 text-green-500 rotate-45" />
+                    )}
+                  {recommendationHistory[index - 1].recommendation === "HOLD" &&
+                    rec.recommendation === "SELL" && (
+                      <ArrowDown className="h-3 w-3 text-red-500 rotate-45" />
+                    )}
+                  {recommendationHistory[index - 1].recommendation === "SELL" &&
+                    rec.recommendation === "BUY" && <ArrowUp className="h-3 w-3 text-green-500" />}
+                  {recommendationHistory[index - 1].recommendation === "SELL" &&
+                    rec.recommendation === "HOLD" && (
+                      <ArrowUp className="h-3 w-3 text-yellow-500 rotate-45" />
+                    )}
                 </div>
               )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  ) : (
+    <div className="text-center p-4 border rounded-lg text-muted-foreground">
+      No recommendation history available
+    </div>
+  )}
+</div>
+
+{/* Recommendation Movement Chart */}
+{recommendationHistory.length > 1 && (
+  <div className="mt-4">
+    <h4 className="text-sm font-semibold mb-3">Recommendation Movement</h4>
+    <div className="h-48 border rounded-lg p-3">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart
+          data={recommendationHistory.map((rec, index) => ({
+            date: rec.date.toLocaleDateString(),
+            value: rec.recommendation === "BUY" ? 3 : rec.recommendation === "HOLD" ? 2 : 1,
+            recommendation: rec.recommendation,
+            id: `chart-item-${index}` // Added unique ID to fix key issue
+          }))}
+          margin={{ top: 5, right: 20, bottom: 20, left: 0 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="date" />
+          <YAxis
+            domain={[0, 4]}
+            ticks={[1, 2, 3]}
+            tickFormatter={(value) => (value === 1 ? "SELL" : value === 2 ? "HOLD" : "BUY")}
+          />
+          <Tooltip
+            formatter={(value, name) => [
+              value === 1 ? "SELL" : value === 2 ? "HOLD" : "BUY",
+              "Recommendation",
+            ]}
+          />
+          <Line
+            type="stepAfter"
+            dataKey="value"
+            stroke="#8884d8"
+            activeDot={{ r: 8 }}
+            dot={(props) => {
+              const { cx, cy, payload } = props;
+              const color =
+                payload.recommendation === "BUY"
+                  ? "#10b981"
+                  : payload.recommendation === "HOLD"
+                    ? "#f59e0b"
+                    : "#ef4444";
+
+              return <circle key={`dot-${payload.id}`} cx={cx} cy={cy} r={6} fill={color} stroke="none" />;
+            }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  </div>
+)}
+
             </TabsContent>
           </Tabs>
         </CardContent>
