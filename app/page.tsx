@@ -197,10 +197,10 @@ export default function Home() {
               </div>
             </div>
             <h1 className="text-5xl md:text-6xl font-extrabold mb-4 leading-tight">
-              Discover{" "}
+              Discover&quot;
               <span className="bg-gradient-to-r from-yellow-200 to-yellow-400 text-transparent bg-clip-text">
                 10x
-              </span>{" "}
+              </span>&quot;
               Market Opportunities
             </h1>
             <p className="text-xl mb-4 text-blue-100">
@@ -223,7 +223,7 @@ export default function Home() {
                   size="lg"
                   className="border-white text-white hover:bg-white/10 font-medium"
                 >
-                  Explore Featured Stocks{" "}
+                  Explore Featured Stocks&quot;
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>

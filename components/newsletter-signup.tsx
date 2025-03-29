@@ -36,7 +36,7 @@ export function NewsletterSignup() {
       <div className="flex flex-col items-center justify-center p-4 bg-green-50 rounded-lg">
         <CheckCircle className="h-12 w-12 text-green-600 mb-2" />
         <h3 className="text-xl font-bold text-green-800">Thank You for Subscribing!</h3>
-        <p className="text-green-700 mb-1">You'll receive our weekly 10xStx insights directly to your inbox.</p>
+        <p className="text-green-700 mb-1">You&apos;ll receive our weekly 10xStx insights directly to your inbox.</p>
         <p className="text-xs text-green-600">Including curated portfolios, stocks to track, and detailed analysis.</p>
       </div>
     )

@@ -338,7 +338,7 @@ export default function TechnicalAnalysisPage() {
                           key={indicator.stockDetails._id}
                           value={indicator.stockDetails.name}
                         >
-                          {indicator.stockDetails.name} -{" "}
+                          {indicator.stockDetails.name} -&quot;
                           {indicator.stockDetails.company}
                         </SelectItem>
                       ))}
@@ -410,7 +410,7 @@ export default function TechnicalAnalysisPage() {
                           ) : (
                             <ArrowDownRight className="h-5 w-5 mr-1" />
                           )}
-                          {trendDirection.percentage}%{" "}
+                          {trendDirection.percentage}%&quot;
                           {trendDirection.direction === "up"
                             ? "Increase"
                             : "Decrease"}
@@ -751,9 +751,9 @@ export default function TechnicalAnalysisPage() {
                               <p className="text-gray-700 text-lg leading-relaxed">
                                 <span className="font-bold text-indigo-700">
                                   {selectedStock.stockDetails.name}
-                                </span>{" "}
-                                is showing{" "}
-                                {selectedStock.stockIndicators.technical_signals.overall.toLowerCase()}{" "}
+                                </span>&quot;
+                                is showing&quot;
+                                {selectedStock.stockIndicators.technical_signals.overall.toLowerCase()}&quot;
                                 technical signals with&nbsp;
                                 <span
                                   className={
@@ -764,8 +764,8 @@ export default function TechnicalAnalysisPage() {
                                 >
                                   {selectedStock.stockIndicators.upside > 0
                                     ? "positive"
-                                    : "negative"}{" "}
-                                  upside potential of{" "}
+                                    : "negative"}&quot;
+                                  upside potential of&quot;
                                   {selectedStock.stockIndicators.upside}%
                                 </span>
                                 . Current pattern: "
