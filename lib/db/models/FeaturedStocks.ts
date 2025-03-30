@@ -22,5 +22,5 @@ const FeaturedStockSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now }
   });
   
-  export const FeaturedStocks = mongoose.models.FeaturedStock || mongoose.model('FeaturedStock', FeaturedStockSchema);
+  export const FeaturedStock = mongoose.models?.FeaturedStock || mongoose.model('FeaturedStock', FeaturedStockSchema);
   

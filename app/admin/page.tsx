@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Users, Briefcase, TrendingUp, RefreshCcw, AlertCircle } from 'lucide-react';
+import { calculateFeaturedStocks } from '@/lib/aiAnalysis';
 
 type OutdatedStock = {
   stockId: string;
@@ -23,6 +24,8 @@ export default function AdminDashboard() {
   const [outdatedStocks, setOutdatedStocks] = useState<OutdatedStock[]>([]);
   const [loadingStocks, setLoadingStocks] = useState(false);
   const [updatingStockId, setUpdatingStockId] = useState<string | null>(null);
+  
+  const [updatingFeaturedStocks, setUpdatingFeaturedStocks] = useState<string | null>(null);
 
   const [stats, setStats] = useState<{ totalUsers: string; activeStocks: string; portfolios: string } | null>(null);
 
@@ -140,6 +143,7 @@ export default function AdminDashboard() {
   };
 
 
+  
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Admin Dashboard</h1>
@@ -206,6 +210,9 @@ export default function AdminDashboard() {
             <Link href="/admin/manage-stocks">
               <Button className="w-full">Manage Stocks</Button>
             </Link>
+           
+          
+           
             <Link href="/admin/register">
               <Button className="w-full">Create Admin</Button>
             </Link>

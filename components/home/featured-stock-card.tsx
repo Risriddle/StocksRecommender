@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { TrendingUp, TrendingDown, Brain, Users, Eye, Star, ArrowUpRight } from "lucide-react"
 import Link from "next/link"
-import { PriceTrend } from "@/components/price-trend"
+import { PriceTrend } from "@/components/home/price-trend"
 
 interface FeaturedStockProps {
   stock: {
@@ -68,9 +68,9 @@ export function FeaturedStockCard({ stock }: FeaturedStockProps) {
           </div>
           <div className="flex flex-col items-end">
             <span className="text-xl font-bold text-green-500">${stock.stockDetails.current_price.toFixed(2)}</span>
-            <span className={`flex items-center text-sm ${stock.change >= 0 ? "text-green-600" : "text-red-600"}`}>
-              {stock.change >= 0 ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
-              {stock.change >= 0 ? "+" : ""}
+            <span className={`flex items-center text-sm ${stock.changePercent >= 0 ? "text-green-600" : "text-red-600"}`}>
+              {stock.changePercent >= 0 ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
+              {stock.changePercent >= 0 ? "+" : ""}
               {stock.changePercent.toFixed(2)}%
             </span>
           </div>
@@ -78,7 +78,7 @@ export function FeaturedStockCard({ stock }: FeaturedStockProps) {
       </CardHeader>
       <CardContent className="pt-4">
         <div className="mb-4">
-          <PriceTrend data={stock.priceTrend} height={60} positive={stock.change >= 0} />
+          <PriceTrend data={stock.priceTrend} height={60} positive={stock.changePercent >= 0} />
         </div>
         <div className="space-y-4">
           <div>

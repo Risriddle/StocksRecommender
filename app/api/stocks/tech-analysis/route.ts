@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { FeaturedStocks } from "@/lib/db/models/FeaturedStocks";
+import { FeaturedStock} from "@/lib/db/models/FeaturedStocks";
 import { Stock } from "@/lib/db/models/Stock";
 import { StockIndicator } from "@/lib/db/models/StockIndicator";
 import dbConnect from "@/lib/db/connect";
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   
   try {
     // Fetch featured stocks first
-    const featuredStocks = await FeaturedStocks.find();
+    const featuredStocks = await FeaturedStock.find();
 
     // Manually fetch stock details and indicators for each featured stock
     const populatedStocks = await Promise.all(

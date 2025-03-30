@@ -32,13 +32,13 @@ import {
   Target,
   Award,
 } from "lucide-react";
-import { FeaturedStockCard } from "@/components/featured-stock-card";
-import { AIInsightCard } from "@/components/ ai-insight-card";
-import { IndustryTrendCard } from "@/components/industry-trend-card";
-import { NewsletterSignup } from "@/components/newsletter-signup";
-import { StockMetricCard } from "@/components/stock-metric-card";
-import { PriceTrend } from "@/components/price-trend";
-import { DisclaimerBanner } from "@/components/disclaimer-banner";
+import { FeaturedStockCard } from "@/components/home/featured-stock-card";
+import { AIInsightCard } from "@/components/home/ ai-insight-card";
+import { IndustryTrendCard } from "@/components/home/industry-trend-card";
+import { NewsletterSignup } from "@/components/home/newsletter-signup";
+import { StockMetricCard } from "@/components/home/stock-metric-card";
+import { PriceTrend } from "@/components/home/price-trend";
+import { DisclaimerBanner } from "@/components/home/disclaimer-banner";
 
 // Industry trends with AI-powered insights
 const industryTrends = [

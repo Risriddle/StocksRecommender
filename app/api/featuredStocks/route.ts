@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { FeaturedStocks } from "@/lib/db/models/FeaturedStocks";
+import { FeaturedStock } from "@/lib/db/models/FeaturedStocks";
 import { Stock } from "@/lib/db/models/Stock";
 import dbConnect from "@/lib/db/connect";
+import { calculateFeaturedStocks } from "@/lib/aiAnalysis";
 
 export async function GET(request: NextRequest) {
   await dbConnect();
-
+  calculateFeaturedStocks();
   try {
     // Fetch featured stocks first
-    const featuredStocks = await FeaturedStocks.find();
+    const featuredStocks = await FeaturedStock.find();
 
     // Manually fetch stock details for each featured stock
     const populatedStocks = await Promise.all(
