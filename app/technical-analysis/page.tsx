@@ -338,7 +338,7 @@ export default function TechnicalAnalysisPage() {
                           key={indicator.stockDetails._id}
                           value={indicator.stockDetails.name}
                         >
-                          {indicator.stockDetails.name} -&quot;
+                          {indicator.stockDetails.name} -
                           {indicator.stockDetails.company}
                         </SelectItem>
                       ))}

@@ -6,7 +6,7 @@ import { calculateFeaturedStocks } from "@/lib/aiAnalysis";
 
 export async function GET(request: NextRequest) {
   await dbConnect();
-  calculateFeaturedStocks();
+  // calculateFeaturedStocks();
   try {
     // Fetch featured stocks first
     const featuredStocks = await FeaturedStock.find();
